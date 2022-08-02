@@ -21,20 +21,21 @@ def check_spelling(data, sentence) -> dict:
     removedpunc = (sentence.translate(str.maketrans('', '', punctuation))).lower()
     for word in word_tokenize(removedpunc):
         # if in wordnet.synsets or words.words then correct
-        if not wordnet.synsets(word.rstrip()):
-            if word.rstrip() not in set(words.words()):
-                if word not in wrong:
-                    wrong.append(word)
-                continue
+        if not wordnet.synsets(word.rstrip()) and word.rstrip() not in set(
+            words.words()
+        ):
+            if word not in wrong:
+                wrong.append(word)
+            continue
         if word not in correct:
             correct.append(word)
     for item in set(correct):
         data["Spelling"].append({"Count": correct.count(item), "Word": item, "Misspelled": "No"})
     for item in set(wrong):
         data["Spelling"].append({"Count": wrong.count(item), "Word": item, "Misspelled": "Yes"})
-    if len(correct) > 0:
+    if correct:
         data["Spelling count"].append({"Total": len(correct), "Misspelled": "No"})
-    if len(wrong) > 0:
+    if wrong:
         data["Spelling count"].append({"Total": len(wrong), "Misspelled": "Yes"})
 
 

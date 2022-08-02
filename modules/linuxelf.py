@@ -62,11 +62,16 @@ class LinuxELF:
         for section in elf.iter_sections():
             if not isinstance(section, SymbolTableSection):
                 continue
-            for symbol in section.iter_symbols():
-                if len(symbol.name) > 0:
-                    temp_list.append({"Type": describe_symbol_type(symbol['st_info']['type']),
-                                      "Symbol": symbol.name,
-                                      "Description": ""})
+            temp_list.extend(
+                {
+                    "Type": describe_symbol_type(symbol['st_info']['type']),
+                    "Symbol": symbol.name,
+                    "Description": "",
+                }
+                for symbol in section.iter_symbols()
+                if len(symbol.name) > 0
+            )
+
             return temp_list
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
@@ -77,11 +82,12 @@ class LinuxELF:
         temp_list = []
         section = elf.get_section_by_name('.dynamic')
         if section is not None:
-            for tag in section.iter_tags():
-                if tag.entry.d_tag != "DT_NEEDED":
-                    continue
-                temp_list.append({"Needed": tag.needed,
-                                  "Description": ""})
+            temp_list.extend(
+                {"Needed": tag.needed, "Description": ""}
+                for tag in section.iter_tags()
+                if tag.entry.d_tag == "DT_NEEDED"
+            )
+
         return temp_list
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
@@ -95,7 +101,7 @@ class LinuxELF:
                 sus = "No"
                 entropy = get_entropy_float_ret(section.data())
                 if entropy > 6 or (0 <= entropy <= 1):
-                    sus = "True, {}".format(entropy)
+                    sus = f"True, {entropy}"
                 elif section.data_size == 0:
                     sus = "True, section size 0"
                 temp_list.append({"Section": section.name,
@@ -111,21 +117,25 @@ class LinuxELF:
         '''
         get run-time linker
         '''
-        for segment in elf.iter_segments():
-            if segment['p_type'] == 'PT_INTERP':
-                return segment.get_interp_name()
-        return ""
+        return next(
+            (
+                segment.get_interp_name()
+                for segment in elf.iter_segments()
+                if segment['p_type'] == 'PT_INTERP'
+            ),
+            "",
+        )
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
     def check_sig(self, data) -> bool:
         '''
         check if mime is linux type
         '''
-        if data["Details"]["Properties"]["mime"] == "application/x-pie-executable" or \
-           data["Details"]["Properties"]["mime"] == "application/x-sharedlib" or \
-           data["Details"]["Properties"]["mime"] == "application/x-executable":
-            return True
-        return False
+        return data["Details"]["Properties"]["mime"] in [
+            "application/x-pie-executable",
+            "application/x-sharedlib",
+            "application/x-executable",
+        ]
 
     @verbose(True, verbose_output=False, timeout=None, _str="Analyzing ELF file")
     def analyze(self, data):

@@ -65,21 +65,19 @@ class WindowsPe:
         '''
         check file if it has Signature or not
         '''
-        index = 0
         temp_list = []
         _extracted = {}
         problems = True
         address = pe_info.OPTIONAL_HEADER.DATA_DIRECTORY[DIRECTORY_ENTRY['IMAGE_DIRECTORY_ENTRY_SECURITY']].VirtualAddress
         if address != 0:
+            index = 0
             with ignore_excpetion(Exception):
                 sig = pe_info.write()[address + 8:]
-                m2cbio = BIO.MemoryBuffer(bytes(sig))
-                if m2cbio:
-                    pkcs7bio = m2.pkcs7_read_bio_der(m2cbio.bio_ptr())
-                    if pkcs7bio:
+                if m2cbio := BIO.MemoryBuffer(bytes(sig)):
+                    if pkcs7bio := m2.pkcs7_read_bio_der(m2cbio.bio_ptr()):
                         pkcs7 = SMIME.PKCS7(pkcs7bio)
+                        tempcert = f"CERT_{index}"
                         for cert in pkcs7.get0_signers(X509.X509_Stack()):
-                            tempcert = "CERT_{}".format(index)
                             _extracted[tempcert] = {"CommonName": None,
                                                     "OrganizationalUnit": None,
                                                     "Organization": None,
@@ -121,10 +119,14 @@ class WindowsPe:
         '''
         find entery point in sections
         '''
-        for section in pe_info.sections:
-            if section.contains_rva(rva_off):
-                return section
-        return ""
+        return next(
+            (
+                section
+                for section in pe_info.sections
+                if section.contains_rva(rva_off)
+            ),
+            "",
+        )
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
     def get_dlls(self, pe_info) -> list:
@@ -148,7 +150,7 @@ class WindowsPe:
             is_sus = "No"
             entropy = get_entropy_float_ret(section.get_data())
             if entropy > 6 or (0 <= entropy <= 1):
-                is_sus = "True, {}".format(entropy)
+                is_sus = f"True, {entropy}"
             elif section.SizeOfRawData == 0:
                 is_sus = "True, section size 0"
             temp_list.append({"Section": section.Name.decode("utf-8", errors="ignore").strip("\00"),
@@ -167,11 +169,15 @@ class WindowsPe:
         temp_list = []
         if hasattr(pe_info, "DIRECTORY_ENTRY_IMPORT"):
             for entry in pe_info.DIRECTORY_ENTRY_IMPORT:
-                for func in entry.imports:
-                    #print({entry.dll.decode("utf-8", errors="ignore"):func.name.decode("utf-8", errors="ignore")})
-                    temp_list.append({"Dll": entry.dll.decode("utf-8", errors="ignore"),
-                                      "Function": func.name.decode("utf-8", errors="ignore"),
-                                      "Description": ""})
+                temp_list.extend(
+                    {
+                        "Dll": entry.dll.decode("utf-8", errors="ignore"),
+                        "Function": func.name.decode("utf-8", errors="ignore"),
+                        "Description": "",
+                    }
+                    for func in entry.imports
+                )
+
         return temp_list
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
@@ -181,9 +187,14 @@ class WindowsPe:
         '''
         temp_list = []
         if hasattr(pe_info, "DIRECTORY_ENTRY_EXPORT"):
-            for func in pe_info.DIRECTORY_ENTRY_EXPORT.symbols:
-                temp_list.append({"Function": func.name.decode("utf-8", errors="ignore"),
-                                  "Description": ""})
+            temp_list.extend(
+                {
+                    "Function": func.name.decode("utf-8", errors="ignore"),
+                    "Description": "",
+                }
+                for func in pe_info.DIRECTORY_ENTRY_EXPORT.symbols
+            )
+
         return temp_list
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
@@ -234,8 +245,11 @@ class WindowsPe:
                 if fileinfo.Key.decode() == 'StringFileInfo':
                     for string_table in fileinfo.StringTable:
                         for entry in string_table.entries.items():
-                            _dict.update({(entry[0].decode("utf-8", errors="ignore")): entry[1].decode("utf-8", errors="ignore")})
-                    if len(_dict) > 0:
+                            _dict[
+                                (entry[0].decode("utf-8", errors="ignore"))
+                            ] = entry[1].decode("utf-8", errors="ignore")
+
+                    if _dict:
                         return _dict
         return _dict
 
@@ -244,17 +258,18 @@ class WindowsPe:
         '''
         get characteristics of file
         '''
-        temp_x = {"High Entropy": pe_info.OPTIONAL_HEADER.IMAGE_DLLCHARACTERISTICS_HIGH_ENTROPY_VA,
-                  "aslr": pe_info.OPTIONAL_HEADER.IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE,
-                  "Force Integrity": pe_info.OPTIONAL_HEADER.IMAGE_DLLCHARACTERISTICS_FORCE_INTEGRITY,
-                  "dep": pe_info.OPTIONAL_HEADER.IMAGE_DLLCHARACTERISTICS_NX_COMPAT,
-                  "seh": not pe_info.OPTIONAL_HEADER.IMAGE_DLLCHARACTERISTICS_NO_SEH,
-                  "No Bind": pe_info.OPTIONAL_HEADER.IMAGE_DLLCHARACTERISTICS_NO_BIND,
-                  "cfg": pe_info.OPTIONAL_HEADER.IMAGE_DLLCHARACTERISTICS_GUARD_CF,
-                  "No Isolation": pe_info.OPTIONAL_HEADER.IMAGE_DLLCHARACTERISTICS_NO_ISOLATION,
-                  "App Container": pe_info.OPTIONAL_HEADER.IMAGE_DLLCHARACTERISTICS_APPCONTAINER,
-                  "wdm Driver": pe_info.OPTIONAL_HEADER.IMAGE_DLLCHARACTERISTICS_WDM_DRIVER}
-        return temp_x
+        return {
+            "High Entropy": pe_info.OPTIONAL_HEADER.IMAGE_DLLCHARACTERISTICS_HIGH_ENTROPY_VA,
+            "aslr": pe_info.OPTIONAL_HEADER.IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE,
+            "Force Integrity": pe_info.OPTIONAL_HEADER.IMAGE_DLLCHARACTERISTICS_FORCE_INTEGRITY,
+            "dep": pe_info.OPTIONAL_HEADER.IMAGE_DLLCHARACTERISTICS_NX_COMPAT,
+            "seh": not pe_info.OPTIONAL_HEADER.IMAGE_DLLCHARACTERISTICS_NO_SEH,
+            "No Bind": pe_info.OPTIONAL_HEADER.IMAGE_DLLCHARACTERISTICS_NO_BIND,
+            "cfg": pe_info.OPTIONAL_HEADER.IMAGE_DLLCHARACTERISTICS_GUARD_CF,
+            "No Isolation": pe_info.OPTIONAL_HEADER.IMAGE_DLLCHARACTERISTICS_NO_ISOLATION,
+            "App Container": pe_info.OPTIONAL_HEADER.IMAGE_DLLCHARACTERISTICS_APPCONTAINER,
+            "wdm Driver": pe_info.OPTIONAL_HEADER.IMAGE_DLLCHARACTERISTICS_WDM_DRIVER,
+        }
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
     def get_debug(self, pe_info) -> list:
@@ -263,9 +278,11 @@ class WindowsPe:
         '''
         temp_list = []
         if hasattr(pe_info, "DIRECTORY_ENTRY_DEBUG"):
-            for item in pe_info.DIRECTORY_ENTRY_DEBUG:
-                temp_list.append({"Name": item.entries.PdbFileName,
-                                  "Description": ""})
+            temp_list.extend(
+                {"Name": item.entries.PdbFileName, "Description": ""}
+                for item in pe_info.DIRECTORY_ENTRY_DEBUG
+            )
+
         return temp_list
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
@@ -273,10 +290,10 @@ class WindowsPe:
         '''
         check mime is exe or msi
         '''
-        if data["Details"]["Properties"]["mime"] == "application/x-dosexec" or \
-                data["Details"]["Properties"]["mime"] == "application/x-msi":
-            return True
-        return False
+        return data["Details"]["Properties"]["mime"] in [
+            "application/x-dosexec",
+            "application/x-msi",
+        ]
 
     @verbose(True, verbose_output=False, timeout=None, _str="Analyzing PE file")
     def analyze(self, data):
@@ -296,7 +313,7 @@ class WindowsPe:
             singinhex = "".join("{:02x}".format(x) for x in sig)
             r2p = r2open("-", flags=['-2'])
             r2p.cmd("e anal.timeout = 5")
-            temp_sig_instructions = r2p.cmd("pad {}".format(singinhex)).split("\n")[:8]
+            temp_sig_instructions = r2p.cmd(f"pad {singinhex}").split("\n")[:8]
             sig_instructions = "\n".join(temp_sig_instructions)
         with ignore_excpetion(Exception):
             en_section_name = section.Name.decode("utf-8", errors="ignore").strip("\00")

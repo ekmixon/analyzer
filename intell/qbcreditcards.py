@@ -47,8 +47,7 @@ class QBCreditcards:
         temp_list = []
         temp_var = findall(self.detectionamericanexpress, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             data.append({"Count": temp_list.count(temp_var), "AmericanExpress": temp_var})
 
@@ -60,8 +59,7 @@ class QBCreditcards:
         temp_list = []
         temp_var = findall(self.detectionvisa, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             data.append({"Count": temp_list.count(temp_var), "Visa": temp_var})
 
@@ -73,8 +71,7 @@ class QBCreditcards:
         temp_list = []
         temp_var = findall(self.detectionmastercard, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             data.append({"Count": temp_list.count(temp_var), "MasterCard": temp_var})
 
@@ -86,8 +83,7 @@ class QBCreditcards:
         temp_list = []
         temp_var = findall(self.detectiondiscover, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             data.append({"Count": temp_list.count(temp_var), "Discover": temp_var})
 
@@ -99,8 +95,7 @@ class QBCreditcards:
         temp_list = []
         temp_var = findall(self.detectionjcb, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             data.append({"Count": temp_list.count(temp_var), "JCB": temp_var})
 
@@ -112,8 +107,7 @@ class QBCreditcards:
         temp_list = []
         temp_var = findall(self.detectiondinersclub, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             data.append({"Count": temp_list.count(temp_var), "DinersClub": temp_var})
 

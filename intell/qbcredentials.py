@@ -42,8 +42,7 @@ class QBCredentials:
         temp_list = []
         temp_var = findall(self.ssn, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             _data.append({"Count": temp_list.count(temp_var), "SSN": temp_var})
 
@@ -55,8 +54,7 @@ class QBCredentials:
         temp_list = []
         temp_var = findall(self.strongpasswords, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_[0])
+            temp_list.extend(_[0] for _ in temp_var)
         for temp_var in set(temp_list):
             _data.append({"Count": temp_list.count(temp_var), "StrongPassword": temp_var})
 
@@ -68,8 +66,7 @@ class QBCredentials:
         temp_list = []
         temp_var = findall(self.username, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             _data.append({"Count": temp_list.count(temp_var), "USER": temp_var})
 
@@ -81,8 +78,7 @@ class QBCredentials:
         temp_list = []
         temp_var = findall(self.logins, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_[0])
+            temp_list.extend(_[0] for _ in temp_var)
         for temp_var in set(temp_list):
             _data.append({"Count": temp_list.count(temp_var), "UserPass": temp_var})
 

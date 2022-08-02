@@ -48,11 +48,11 @@ class QBURLSimilarity:
         check if top-1m.csv exists or not, if not then download load
         it and unzip it and take the top 10000 only
         '''
-        if not path.exists(_path + 'top-1m.csv'):
+        if not path.exists(f'{_path}top-1m.csv'):
             zip_file = ZipFile(BytesIO(get(self.top).content))
-            with zip_file.open('top-1m.csv') as temp_zip_file, open(_path + 'top-1m.csv', 'wb') as file:
+            with zip_file.open('top-1m.csv') as temp_zip_file, open(f'{_path}top-1m.csv', 'wb') as file:
                 copyfileobj(temp_zip_file, file)
-        with open(_path + 'top-1m.csv', 'r') as file:
+        with open(f'{_path}top-1m.csv', 'r') as file:
             self.topsliced = islice(reader(file), 10000)
             self.topdomains = [x[1] for x in self.topsliced]
 
@@ -67,7 +67,7 @@ class QBURLSimilarity:
         for _ in temp_var:
             url = ""
             if not _[0].startswith(("http://", "https://", "ftp://")):
-                url = "http://" + _[0]
+                url = f"http://{_[0]}"
             if get_tld(url, fail_silently=True):
                 root = None
                 with ignore_excpetion(Exception):

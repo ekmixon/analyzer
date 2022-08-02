@@ -96,8 +96,7 @@ class QBSecrets:
         temp_list = []
         temp_var = findall(self.detectionawsclientid, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_[0])
+            temp_list.extend(_[0] for _ in temp_var)
         for temp_var in set(temp_list):
             data.append({"Count": temp_list.count(temp_var), "AWSCLIENTID": temp_var})
 
@@ -109,8 +108,7 @@ class QBSecrets:
         temp_list = []
         temp_var = findall(self.detectionamazonmwsauthtoken, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             data.append({"Count": temp_list.count(temp_var), "AMAZONMWSAUTHTOKEN": temp_var})
 
@@ -122,8 +120,7 @@ class QBSecrets:
         temp_list = []
         temp_var = findall(self.detectionamazonaws, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             data.append({"Count": temp_list.count(temp_var), "AMAZONAWS": temp_var})
 
@@ -135,8 +132,7 @@ class QBSecrets:
         temp_list = []
         temp_var = findall(self.detectionamazongeneric, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             data.append({"Count": temp_list.count(temp_var), "AMAZONGENERIC": temp_var})
 
@@ -148,8 +144,7 @@ class QBSecrets:
         temp_list = []
         temp_var = findall(self.detectionaliyunoss, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             data.append({"Count": temp_list.count(temp_var), "ALIYUNOSS": temp_var})
 
@@ -161,8 +156,7 @@ class QBSecrets:
         temp_list = []
         temp_var = findall(self.detectionazurestorage, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             data.append({"Count": temp_list.count(temp_var), "AZURESTORAGE": temp_var})
 
@@ -174,8 +168,7 @@ class QBSecrets:
         temp_list = []
         temp_var = findall(self.detectionfacebookaccesstoken, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             data.append({"Count": temp_list.count(temp_var), "FACEBOOKACCESSTOKEN": temp_var})
 
@@ -187,8 +180,7 @@ class QBSecrets:
         temp_list = []
         temp_var = findall(self.detectiongithubtoken, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             data.append({"Count": temp_list.count(temp_var), "GITHUBTOKEN": temp_var})
 
@@ -200,8 +192,7 @@ class QBSecrets:
         temp_list = []
         temp_var = findall(self.detectiongoogleapikey, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             data.append({"Count": temp_list.count(temp_var), "GOOGLEAPIKEY": temp_var})
 
@@ -213,8 +204,7 @@ class QBSecrets:
         temp_list = []
         temp_var = findall(self.detectiongooglecaptcha, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             data.append({"Count": temp_list.count(temp_var), "GOOGLECAPTCHA": temp_var})
 
@@ -226,8 +216,7 @@ class QBSecrets:
         temp_list = []
         temp_var = findall(self.detectiongoogleoauth, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             data.append({"Count": temp_list.count(temp_var), "GOOGLEOAUTH": temp_var})
 
@@ -239,8 +228,7 @@ class QBSecrets:
         temp_list = []
         temp_var = findall(self.detectiongooglesecret, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             data.append({"Count": temp_list.count(temp_var), "GOOGLESECRET": temp_var})
 
@@ -252,8 +240,7 @@ class QBSecrets:
         temp_list = []
         temp_var = findall(self.detectiongoogleoauthaccesstoken, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             data.append({"Count": temp_list.count(temp_var), "GOOGLEOAUTHACCESSTOKEN": temp_var})
 
@@ -265,8 +252,7 @@ class QBSecrets:
         temp_list = []
         temp_var = findall(self.detectionmailgunapikey, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             data.append({"Count": temp_list.count(temp_var), "MAILGUNAPIKEY": temp_var})
 
@@ -278,8 +264,7 @@ class QBSecrets:
         temp_list = []
         temp_var = findall(self.detectionmailchampapi, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             data.append({"Count": temp_list.count(temp_var), "MAILCHAMPAPI": temp_var})
 
@@ -291,8 +276,7 @@ class QBSecrets:
         temp_list = []
         temp_var = findall(self.detectionpicaticapi, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             data.append({"Count": temp_list.count(temp_var), "PICATICAPI": temp_var})
 
@@ -304,8 +288,7 @@ class QBSecrets:
         temp_list = []
         temp_var = findall(self.detectionslacktoken, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_[0])
+            temp_list.extend(_[0] for _ in temp_var)
         for temp_var in set(temp_list):
             data.append({"Count": temp_list.count(temp_var), "SLACKTOKEN": temp_var})
 
@@ -317,8 +300,7 @@ class QBSecrets:
         temp_list = []
         temp_var = findall(self.detectionsquareaccesstoken, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             data.append({"Count": temp_list.count(temp_var), "SQUAREACCESSTOKEN": temp_var})
 
@@ -330,8 +312,7 @@ class QBSecrets:
         temp_list = []
         temp_var = findall(self.detectionsquareoauthsecret, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             data.append({"Count": temp_list.count(temp_var), "SQUAREOAUTHSECRET": temp_var})
 
@@ -343,8 +324,7 @@ class QBSecrets:
         temp_list = []
         temp_var = findall(self.detectionstripesapi, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             data.append({"Count": temp_list.count(temp_var), "STRIPESAPI": temp_var})
 
@@ -356,8 +336,7 @@ class QBSecrets:
         temp_list = []
         temp_var = findall(self.detectiontwilioapikey, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             data.append({"Count": temp_list.count(temp_var), "TWILIOAPIKEY": temp_var})
 
@@ -369,8 +348,7 @@ class QBSecrets:
         temp_list = []
         temp_var = findall(self.detectiontwiliosid, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             data.append({"Count": temp_list.count(temp_var), "TWILIOSID": temp_var})
 

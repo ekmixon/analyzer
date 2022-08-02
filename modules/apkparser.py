@@ -28,11 +28,9 @@ class ApkParser:
         '''
         wrapper
         '''
-        temp_string = ""
         if _str == "":
-            return r2p.cmd(switch + "~+" + _str).split("\n")
-        for _ in _str:
-            temp_string += r2p.cmd(switch + "~+" + _)
+            return r2p.cmd(f"{switch}~+{_str}").split("\n")
+        temp_string = "".join(r2p.cmd(f"{switch}~+{_}") for _ in _str)
         return temp_string.split("\n")
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
@@ -44,7 +42,7 @@ class ApkParser:
         with ignore_excpetion(Exception):
             add = line.split(" ")[0]
             int(add, 0)
-            temp_string = r2p.cmd("pd 1 @  " + add + "~XREF")
+            temp_string = r2p.cmd(f"pd 1 @  {add}~XREF")
         return temp_string.split("\n")
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
@@ -52,22 +50,22 @@ class ApkParser:
         '''
         get all classes from dex using icq command
         '''
-        temp_list = []
-        for _ in self.execute_with_swtich(r2p, "icq", ""):
-            if _ != "":
-                temp_list.append({"Type": "Class", "Name": _})
-        return temp_list
+        return [
+            {"Type": "Class", "Name": _}
+            for _ in self.execute_with_swtich(r2p, "icq", "")
+            if _ != ""
+        ]
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
     def get_all_externals(self, r2p) -> list:
         '''
         get all externals from dex using iiq command
         '''
-        temp_list = []
-        for _ in self.execute_with_swtich(r2p, "iiq", ""):
-            if _ != "":
-                temp_list.append({"Type": "External", "Name": _})
-        return temp_list
+        return [
+            {"Type": "External", "Name": _}
+            for _ in self.execute_with_swtich(r2p, "iiq", "")
+            if _ != ""
+        ]
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
     def get_all_symbols(self, r2p) -> list:
@@ -86,12 +84,11 @@ class ApkParser:
         '''
         get all big functions from dex using aflj command
         '''
-        temp_list = []
-        for item in r2p.cmdj("aflj"):
-            if item["size"] > 64:
-                temp_list.append({"Size": item["size"], "Name": item["name"]})
-                # temp_list.append(r2p.cmd("pif@"+str(a["offset"])+"~call"))
-        return temp_list
+        return [
+            {"Size": item["size"], "Name": item["name"]}
+            for item in r2p.cmdj("aflj")
+            if item["size"] > 64
+        ]
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
     def check_sus(self, r2p) -> list:
@@ -137,11 +134,13 @@ class ApkParser:
         text = sub(rb'[^\x20-\x7e]{2,}', b' ', temp_f)
         text = sub(rb'[^\x20-\x7e]{1,}', b'', text)
         text = sub(rb'[^\w\. ]', b'', text)
-        words = text.decode("utf-8", errors="ignore").split(" ")
-        if words:
-            for item in words:
-                if "permission." in item:
-                    temp_list.append({"Permission": item, "Description": ""})
+        if words := text.decode("utf-8", errors="ignore").split(" "):
+            temp_list.extend(
+                {"Permission": item, "Description": ""}
+                for item in words
+                if "permission." in item
+            )
+
         return temp_list
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
@@ -149,11 +148,14 @@ class ApkParser:
         '''
         check if mime is an apk type or if file contains Androidmanifest in packed files
         '''
-        if data["Details"]["Properties"]["mime"] == "application/java-archive" or \
-                data["Details"]["Properties"]["mime"] == "application/zip":
-            if check_packed_files(data["Location"]["File"], ["Androidmanifest.xml"]):
-                unpack_file(data, data["Location"]["File"])
-                return True
+        if data["Details"]["Properties"]["mime"] in [
+            "application/java-archive",
+            "application/zip",
+        ] and check_packed_files(
+            data["Location"]["File"], ["Androidmanifest.xml"]
+        ):
+            unpack_file(data, data["Location"]["File"])
+            return True
         return False
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
@@ -161,9 +163,10 @@ class ApkParser:
         '''
         check if mime is a dex
         '''
-        if data["Details"]["Properties"]["mime"] == "application/octet-stream" and data["Location"]["Original"].endswith(".dex"):
-            return True
-        return False
+        return bool(
+            data["Details"]["Properties"]["mime"] == "application/octet-stream"
+            and data["Location"]["Original"].endswith(".dex")
+        )
 
     @verbose(True, verbose_output=False, timeout=None, _str="Analyzing DEX file")
     def dex_wrapper(self, data, r2p, index):
@@ -214,7 +217,7 @@ class ApkParser:
                 r2p = r2open(item["Path"], flags=['-2'])
                 r2p.cmd("e anal.timeout = 5")
                 r2p.cmd("aaaa;")
-                self.dex_wrapper(data, r2p, 'APK_DEX_{}'.format(index))
+                self.dex_wrapper(data, r2p, f'APK_DEX_{index}')
         add_description("AndroidPermissions", data["APK"]["Permissions"], "Permission")
         get_words_multi_files(data, data["Packed"]["Files"])
         r2p.quit()

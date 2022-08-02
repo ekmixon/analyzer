@@ -401,9 +401,10 @@ class LoginForm(form.Form):
         log in
         '''
         user = self.get_user()  # fix AttributeError: 'NoneType' object has no attribute 'password'
-        if user is not None:
-            if not BCRYPT.check_password_hash(user.password, self.password.data):
-                raise validators.ValidationError('Invalid password')
+        if user is not None and not BCRYPT.check_password_hash(
+            user.password, self.password.data
+        ):
+            raise validators.ValidationError('Invalid password')
 
     def get_user(self):
         '''
@@ -463,7 +464,10 @@ class CustomAdminIndexView(AdminIndexView):
         self._template_args['form'] = temp_form
         self._template_args['active'] = "Login"
         self._template_args['intro'] = ""
-        self._template_args['link'] = '<p>Register? <a href="{}">Click here</a></p>'.format(url_for('.register_view'))
+        self._template_args[
+            'link'
+        ] = f"""<p>Register? <a href="{url_for('.register_view')}">Click here</a></p>"""
+
         return super(CustomAdminIndexView, self).index()
 
     @expose('/register/', methods=('GET', 'POST'))
@@ -485,7 +489,10 @@ class CustomAdminIndexView(AdminIndexView):
         self._template_args['form'] = temp_form
         self._template_args['active'] = "Register"
         self._template_args['intro'] = ""
-        self._template_args['link'] = '*Please do not enter a used username or password<p><p>Login? <a href="{}">Click here</a></p>'.format(url_for('.login_view'))
+        self._template_args[
+            'link'
+        ] = f"""*Please do not enter a used username or password<p><p>Login? <a href="{url_for('.login_view')}">Click here</a></p>"""
+
         return super(CustomAdminIndexView, self).index()
 
     @expose('/logout/')
@@ -573,11 +580,9 @@ class CustomViewUploadForm(BaseView):
                 filename = ""
                 uuid = str(uuid4())
                 if file:
-                    result = {}
                     filename = secure_filename(file.filename)
                     savetotemp = path.join(MALWARE_FOLDER, filename)
-                    for item in request.form.getlist("choices"):
-                        result.update({item: True})
+                    result = {item: True for item in request.form.getlist("choices")}
                     result["file"] = savetotemp
                     result["uuid"] = uuid
                     result["analyzer_timeout"] = temp_form.analyzertimeout.data
@@ -593,9 +598,15 @@ class CustomViewUploadForm(BaseView):
                     if len(uploaded_files) == 1 and request.form.get('submitandwait') == 'Submit And Wait':
                         flash(gettext(uuid), 'successandwaituuid')
                     else:
-                        flash(gettext("Done uploading {} Task ({})".format(filename, uuid)), 'success')
+                        flash(gettext(f"Done uploading {filename} Task ({uuid})"), 'success')
                 else:
-                    flash(gettext("Something wrong while uploading {} Task ({})".format(filename, uuid)), 'error')
+                    flash(
+                        gettext(
+                            f"Something wrong while uploading {filename} Task ({uuid})"
+                        ),
+                        'error',
+                    )
+
         return self.render("upload.html", header="Scan File\\Files", table_header="Last 10 Files", form=temp_form, recent_files=get_last_files("files"))
 
     def is_accessible(self):
@@ -644,11 +655,9 @@ class CustomViewBufferForm(BaseView):
         if request.method == 'POST':
             if temp_form.buffer.data != "":
                 uuid = str(uuid4())
-                result = {}
-                for item in request.form.getlist("choices"):
-                    result.update({item: True})
+                result = {item: True for item in request.form.getlist("choices")}
                 filename = ''.join(choice(ascii_uppercase) for _ in range(8))
-                savetotemp = path.join(MALWARE_FOLDER, filename) + "._buffer"
+                savetotemp = f"{path.join(MALWARE_FOLDER, filename)}._buffer"
                 with open(savetotemp, "w") as tempfile:
                     tempfile.write(temp_form.buffer.data)
                 with open(savetotemp, "rb") as tempfile:
@@ -665,7 +674,7 @@ class CustomViewBufferForm(BaseView):
                     if request.form.get('submitandwait') == 'Submit And Wait':
                         flash(gettext(uuid), 'successandwaituuid')
                     else:
-                        flash(gettext('Done submitting buffer Task {}'.format(uuid)), 'success')
+                        flash(gettext(f'Done submitting buffer Task {uuid}'), 'success')
             else:
                 flash(gettext("Something wrong"), 'error')
         return self.render("upload.html", header="Scan Buffer", table_header="Last 10 Buffers", form=temp_form, recent_files=get_last_files("buffer"))
@@ -691,27 +700,50 @@ def get_stats():
     with ignore_excpetion(Exception):
         for coll in (defaultdb["reportscoll"], defaultdb["filescoll"], "fs.chunks", "fs.files"):
             if coll in CLIENT[defaultdb["dbname"]].list_collection_names():
-                stats.update({"[{}] Collection".format(coll): "Good"})
+                stats[f"[{coll}] Collection"] = "Good"
             else:
-                stats.update({"[{}] Collection".format(coll): "Bad"})
+                stats[f"[{coll}] Collection"] = "Bad"
     with ignore_excpetion(Exception):
-        stats.update({"[Reports] Total reports": CLIENT[defaultdb["dbname"]][defaultdb["reportscoll"]].find({}).count(),
-                      "[Reports] Total used space": "{}".format(convert_size(CLIENT[defaultdb["dbname"]].command("collstats", defaultdb["reportscoll"])["storageSize"] + CLIENT[defaultdb["dbname"]].command("collstats", defaultdb["reportscoll"])["totalIndexSize"]))})
+        stats |= {
+            "[Reports] Total reports": CLIENT[defaultdb["dbname"]][
+                defaultdb["reportscoll"]
+            ]
+            .find({})
+            .count(),
+            "[Reports] Total used space": f'{convert_size(CLIENT[defaultdb["dbname"]].command("collstats", defaultdb["reportscoll"])["storageSize"] + CLIENT[defaultdb["dbname"]].command("collstats", defaultdb["reportscoll"])["totalIndexSize"])}',
+        }
+
     with ignore_excpetion(Exception):
-        stats.update({"[Files] Total files uploaded": CLIENT[defaultdb["dbname"]][defaultdb["filescoll"]].find({}).count()})
+        stats["[Files] Total files uploaded"] = (
+            CLIENT[defaultdb["dbname"]][defaultdb["filescoll"]]
+            .find({})
+            .count()
+        )
+
     with ignore_excpetion(Exception):
-        stats.update({"[Files] Total uploaded files size": "{}".format(convert_size(CLIENT[defaultdb["dbname"]]["fs.chunks"].find().count() * 255 * 1000))})
+        stats[
+            "[Files] Total uploaded files size"
+        ] = f'{convert_size(CLIENT[defaultdb["dbname"]]["fs.chunks"].find().count() * 255 * 1000)}'
+
     with ignore_excpetion(Exception):
-        stats.update({"[Users] Total users": CLIENT[defaultdb["dbname"]][defaultdb["userscoll"]].find({}).count()})
+        stats["[Users] Total users"] = (
+            CLIENT[defaultdb["dbname"]][defaultdb["userscoll"]]
+            .find({})
+            .count()
+        )
+
     with ignore_excpetion(Exception):
         total, used, free = disk_usage("/")
-        stats.update({"CPU memory": cpu_percent(),
-                      "Memory used": virtual_memory()[2],
-                      "Current process used memory": "{}".format(convert_size(Process(getpid()).memory_info().rss)),
-                      "Total disk size": "{}".format(convert_size(total)),
-                      "Used disk size": "{}".format(convert_size(used)),
-                      "Free disk size": "{}".format(convert_size(free)),
-                      "Host platform": pplatform()})
+        stats |= {
+            "CPU memory": cpu_percent(),
+            "Memory used": virtual_memory()[2],
+            "Current process used memory": f"{convert_size(Process(getpid()).memory_info().rss)}",
+            "Total disk size": f"{convert_size(total)}",
+            "Used disk size": f"{convert_size(used)}",
+            "Free disk size": f"{convert_size(free)}",
+            "Host platform": pplatform(),
+        }
+
     CLIENT.close()
     return stats
 
@@ -744,16 +776,12 @@ def find_and_srot(database, collection, key, var):
     '''
     hmm finding by time is weird?
     '''
-    temp_list = []
     if key == "time":
         items = list(CLIENT[database][collection].find().sort([('_id', -1)]).limit(1))
     else:
         items = list(CLIENT[database][collection].find({key: {"$gt": var}}).sort([(key, ASCENDING)]))
-    for item in items:
-        temp_list.append("{} {}".format(item["time"].isoformat(), item["message"]))
-    if len(temp_list) > 0:
-        return "\n".join(temp_list), str(items[-1]["_id"])
-    return "", 0
+    temp_list = [f'{item["time"].isoformat()} {item["message"]}' for item in items]
+    return ("\n".join(temp_list), str(items[-1]["_id"])) if temp_list else ("", 0)
 
 
 def get_last_logs(json):
@@ -812,8 +840,9 @@ class CheckTask(BaseView):
         if request.method == 'POST':
             if request.json:
                 json_content = request.get_json(silent=True)
-                item = CLIENT[defaultdb["dbname"]][defaultdb["reportscoll"]].find_one({"uuid": json_content["uuid"], "type": "text/html"})
-                if item:
+                if item := CLIENT[defaultdb["dbname"]][
+                    defaultdb["reportscoll"]
+                ].find_one({"uuid": json_content["uuid"], "type": "text/html"}):
                     return jsonify({"Task": str(item["file"])})
             return jsonify({"Task": ""})
         return self.render("activelogs.html")
@@ -860,7 +889,7 @@ def find_items_without_coll(database, collection, items):
         if item != '':
             temp_ret = CLIENT[database][collection].find_one({"_id": ObjectId(item)}, {'_id': False})
             if temp_ret is not None:
-                temp_dict.update({item: temp_ret})
+                temp_dict[item] = temp_ret
     return temp_dict
 
 

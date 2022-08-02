@@ -34,11 +34,7 @@ class QBWhitelist:
     def loop_wrapper(self, items, keys, data):
         if len(items) > 0:
             for item in items:
-                temp_dict = {}
-                for key in keys:
-                    if key in item:
-                        temp_dict.update({key: item[key]})
-                if len(temp_dict) > 0:
+                if temp_dict := {key: item[key] for key in keys if key in item}:
                     data.append(temp_dict)
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
@@ -92,12 +88,14 @@ class QBWhitelist:
         data["WhiteList"] = deepcopy(self.datastruct)
         self.words = data["StringsRAW"]["wordsinsensitive"]
         self.wordsstripped = data["StringsRAW"]["wordsstripped"]
-        if parsed.w_internal or parsed.w_all or parsed.full:
-            if len(data["Details"]["Properties"]["Name"]) > 3:
-                self.find_it_by_internal_name(data["Details"]["Properties"]["Name"], data["WhiteList"]["ByInternalName"])
-        if parsed.w_original or parsed.w_all or parsed.full:
-            if len(data["Details"]["Properties"]["Name"]) > 3:
-                self.find_it_by_original_filename(data["Details"]["Properties"]["Name"], data["WhiteList"]["ByInternalName"])
+        if (parsed.w_internal or parsed.w_all or parsed.full) and len(
+            data["Details"]["Properties"]["Name"]
+        ) > 3:
+            self.find_it_by_internal_name(data["Details"]["Properties"]["Name"], data["WhiteList"]["ByInternalName"])
+        if (parsed.w_original or parsed.w_all or parsed.full) and len(
+            data["Details"]["Properties"]["Name"]
+        ) > 3:
+            self.find_it_by_original_filename(data["Details"]["Properties"]["Name"], data["WhiteList"]["ByInternalName"])
         if parsed.w_hash or parsed.w_all or parsed.full:
             self.find_it_by_hash(data["Details"]["Properties"]["md5"], data["WhiteList"]["Bymd5"])
         if parsed.w_all or ((parsed.w_words or parsed.full) and parsed.buffer is not None):

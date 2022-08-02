@@ -3,14 +3,13 @@
     connection -> elastic
 '''
 
+
 from os import environ
 from elasticsearch import Elasticsearch
 from analyzer.settings import elastic_db
 from analyzer.logger.logger import ignore_excpetion
 
-if environ["analyzer_env"] == "local":
-    ELASTIC_SEARCH = Elasticsearch([elastic_db])
-elif environ["analyzer_env"] == "docker":
+if environ["analyzer_env"] in ["local", "docker"]:
     ELASTIC_SEARCH = Elasticsearch([elastic_db])
 
 

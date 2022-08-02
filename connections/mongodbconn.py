@@ -24,9 +24,7 @@ def update_item(database_name, collection_name, _id, _set):
     simple item update
     '''
     item = CLIENT[database_name][collection_name].find_one_and_update({'_id': _id}, {'$set': _set})
-    if item is not None:
-        return item
-    return False
+    return item if item is not None else False
 
 
 def add_item(database_name, collection_name, _set):
@@ -34,9 +32,7 @@ def add_item(database_name, collection_name, _set):
     add an item and return it otherwise False
     '''
     item = CLIENT[database_name][collection_name].insert_one(_set)
-    if item is not None:
-        return item
-    return False
+    return item if item is not None else False
 
 
 def find_item(database_name, collection_name, _set):
@@ -44,9 +40,7 @@ def find_item(database_name, collection_name, _set):
     find an item and return it otherwise return empty string
     '''
     item = CLIENT[database_name][collection_name].find_one(_set, {'_id': False})
-    if item is not None:
-        return item
-    return ""
+    return item if item is not None else ""
 
 
 def find_items(database_name, _set):
@@ -61,9 +55,7 @@ def find_items(database_name, _set):
                 item.update({"Collection": collection_name})
                 _list.append(item)
 
-    if len(_list) > 0:
-        return _list
-    return ""
+    return _list or ""
 
 
 def add_item_fs(database_name, collection_name, file_buffer, name, _set, uuid, _type, time):
@@ -73,9 +65,7 @@ def add_item_fs(database_name, collection_name, file_buffer, name, _set, uuid, _
     item = GridFS(CLIENT[database_name]).put(file_buffer, filename=name, uuid=uuid, content_type=_type, encoding='utf-8')
     if item is not None:
         item = CLIENT[database_name][collection_name].insert_one({"uuid": uuid, "type": _type, "file": ObjectId(item), "time": time})
-        if item is not None:
-            return item
-    return False
+    return item if item is not None else False
 
 
 def get_it_fs(database_name, _set):
@@ -83,6 +73,4 @@ def get_it_fs(database_name, _set):
     get an item from  FS
     '''
     item = GridFS(CLIENT[database_name]).find_one(_set)
-    if item is not None:
-        return item.read()
-    return False
+    return item.read() if item is not None else False

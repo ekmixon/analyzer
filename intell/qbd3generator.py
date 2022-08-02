@@ -30,9 +30,7 @@ class QBD3generator:
         elif func.startswith("sym."):
             if func[4:].lower() in _str.lower():
                 return False
-        if search(r'\b{}\b'.format(func), _str) is not None:
-            return False
-        return True
+        return search(f'\b{func}\b', _str) is None
 
     @verbose(True, verbose_output=False, timeout=None, _str="Making symbol xrefs")
     def create_d3_ref(self, data):
@@ -57,13 +55,12 @@ class QBD3generator:
             for func in funcs:
                 if "opcode" in func and "fcn_name" in func:
                     match = search(r'\[(.*?)\]', func["opcode"])
-                    if match is not None:
-                        if len(r2p.cmd("pd 1 @ " + match.group(1))) > 0:
-                            _list.append({"From": func["fcn_name"], "To": match.group(1)})
-                    else:
+                    if match is None:
                         funcfromopcode = ''.join(func["opcode"].split(' ')[-1:])
                         _list.append({"From": func["fcn_name"], "To": funcfromopcode})
 
+                    elif len(r2p.cmd(f"pd 1 @ {match.group(1)}")) > 0:
+                        _list.append({"From": func["fcn_name"], "To": match.group(1)})
         for xfunc in _list:
             if self.check_func(xfunc["From"], sym):
                 if xfunc["From"] not in _temp:
@@ -80,7 +77,7 @@ class QBD3generator:
                 if next((item for item in _links if item["source"] == temp_var_s and item["target"] == temp_var_t), False) is False:
                     _links.append({"source": temp_var_s, "target": temp_var_t})
 
-        if len(_node) > 0 and len(_links) > 0:
+        if _node and _links:
             data["XREFS"]["GRAPH"]["nodes"] = _node
             data["XREFS"]["GRAPH"]["links"] = _links
             data["XREFS"]["TEXT"] = _list
@@ -99,12 +96,16 @@ class QBD3generator:
         _temp = []
 
         with ignore_excpetion(Exception):
-            for item in data["Strings"]["IPS"]:
-                _list.append({"From": "File", "To": item["IP"]})
+            _list.extend(
+                {"From": "File", "To": item["IP"]}
+                for item in data["Strings"]["IPS"]
+            )
 
         with ignore_excpetion(Exception):
-            for item in data["Strings"]["EMAILs"]:
-                _list.append({"From": "File", "To": item["EMAIL"]})
+            _list.extend(
+                {"From": "File", "To": item["EMAIL"]}
+                for item in data["Strings"]["EMAILs"]
+            )
 
         for item in _list:
             if item["From"] not in _temp:
@@ -121,7 +122,7 @@ class QBD3generator:
                 if next((item for item in _links if item["source"] == temp_var_s and item["target"] == temp_var_t), False) is False:
                     _links.append({"source": temp_var_s, "target": temp_var_t})
 
-        if len(_node) > 0 and len(_links) > 0:
+        if _node and _links:
             data["REFS"]["GRAPH"]["nodes"] = _node
             data["REFS"]["GRAPH"]["links"] = _links
             data["REFS"]["TEXT"] = _list

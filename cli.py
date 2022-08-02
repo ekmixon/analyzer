@@ -3,6 +3,7 @@
     cli
 '''
 
+
 from gevent.monkey import patch_all
 patch_all()
 
@@ -30,7 +31,7 @@ from analyzer.settings import __V__
 print("                                                            ")
 print(" _____  __   _  _____        \\   / ______  ______  _____   ")
 print("|_____| | \\  | |_____| |      \\_/   ____/ |______ |_____/")
-print("|     | |  \\_| |     | |_____  |   /_____ |______ |    \\ {}".format(__V__))
+print(f"|     | |  \\_| |     | |_____  |   /_____ |______ |    \\ {__V__}")
 print("                               |  https://github.com/QeeqBox/Analyzer")
 print("                                                            ")
 
@@ -166,12 +167,16 @@ class QBAnalyzer(Cmd):
                 json_settings[environ["analyzer_env"]]["function_timeout"] = int(parsed.function_timeout)
             good_exec = True
         if good_exec:
-            log_string("Default timeout {}s for the task, and {}s for each logic".format(json_settings[environ["analyzer_env"]]["analyzer_timeout"], json_settings[environ["analyzer_env"]]["function_timeout"]), "Yellow")
+            log_string(
+                f'Default timeout {json_settings[environ["analyzer_env"]]["analyzer_timeout"]}s for the task, and {json_settings[environ["analyzer_env"]]["function_timeout"]}s for each logic',
+                "Yellow",
+            )
+
         else:
             log_string("Parsing failed, something went wrong..", "Red")
             return
 
-        log_string("Task {} (Started)".format(parsed.uuid), "Yellow")
+        log_string(f"Task {parsed.uuid} (Started)", "Yellow")
 
         if parsed.file:
             with ignore_excpetion(Exception):
@@ -181,7 +186,7 @@ class QBAnalyzer(Cmd):
         else:
             log_string("File, Folder or Buffer is missing", "Red")
 
-        log_string("Task {} (Finished)".format(parsed.uuid), "Green")
+        log_string(f"Task {parsed.uuid} (Finished)", "Green")
 
     def analyze_file(self, parsed):
         if path.exists(parsed.file) and path.isfile(parsed.file):
@@ -193,7 +198,7 @@ class QBAnalyzer(Cmd):
 
     def list_switches(self):
         for x in vars(self._analyze_parser.parse_args("")):
-            print("(\'{}\', \'{}\'')".format(x, x))
+            print(f"(\'{x}\', \'{x}\'')")
 
     def do_exit(self, line):
         exit()

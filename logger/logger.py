@@ -3,6 +3,7 @@
     logger -> main
 '''
 
+
 from os import path, environ
 from contextlib import contextmanager
 from sys import stdout
@@ -41,10 +42,10 @@ class TerminalColors:
     White = "\033[37m"
 
 
-GREEN_X = '{}{}{}'.format(TerminalColors.Green, "X", TerminalColors.Restore)
-YELLOW_ARROW = '{}{}{}'.format(TerminalColors.Yellow, ">", TerminalColors.Restore)
-EXCLAMATION_MARK = '{}{}{}'.format(TerminalColors.Yellow, "!", TerminalColors.Restore)
-RED_ARROW = '{}{}{}'.format(TerminalColors.Red, ">", TerminalColors.Restore)
+GREEN_X = f'{TerminalColors.Green}X{TerminalColors.Restore}'
+YELLOW_ARROW = f'{TerminalColors.Yellow}>{TerminalColors.Restore}'
+EXCLAMATION_MARK = f'{TerminalColors.Yellow}!{TerminalColors.Restore}'
+RED_ARROW = f'{TerminalColors.Red}>{TerminalColors.Restore}'
 
 
 @contextmanager
@@ -95,9 +96,9 @@ class CustomHandler(Handler):
         '''
         override emit
         '''
-        print("{} {} {}".format(record.msg[0], record.msg[2], record.msg[1]))
+        print(f"{record.msg[0]} {record.msg[2]} {record.msg[1]}")
         stdout.flush()
-        self.logsfile.write("{} {} {}\n".format(record.msg[0], record.msg[2], record.msg[1]))
+        self.logsfile.write(f"{record.msg[0]} {record.msg[2]} {record.msg[1]}\n")
         self.logsfile.flush()
         add_item(defaultdb["dbname"], defaultdb["alllogscoll"], {'time': record.msg[0], 'message': record.msg[1]})
 
@@ -119,16 +120,21 @@ class TaskHandler(Handler):
         '''
         override emit
         '''
-        self.logsfile.write("{} {}\n".format(record.msg[0], record.msg[1]))
+        self.logsfile.write(f"{record.msg[0]} {record.msg[1]}\n")
         self.logsfile.flush()
-        update_task(defaultdb["dbname"], defaultdb["taskdblogscoll"], self.task, "{} {}".format(record.msg[0], record.msg[1]))
+        update_task(
+            defaultdb["dbname"],
+            defaultdb["taskdblogscoll"],
+            self.task,
+            f"{record.msg[0]} {record.msg[1]}",
+        )
 
 
 def setup_task_logger(task):
     '''
     setup the dynamic logger for the task
     '''
-    log_string("Setting up task {} logger".format(task), "Yellow")
+    log_string(f"Setting up task {task} logger", "Yellow")
     add_item(defaultdb["dbname"], defaultdb["taskdblogscoll"], {"task": task, "logs": []})
     DYNAMIC.handlers.clear()
     DYNAMIC.setLevel(DEBUG)
@@ -140,14 +146,22 @@ def cancel_task_logger(task):
     '''
     cancel dynamic logger for the task
     '''
-    log_string("Closing up task {} logger".format(task), "Yellow")
+    log_string(f"Closing up task {task} logger", "Yellow")
     DYNAMIC.disabled = True
     logs = ""
     with open(path.join(json_settings[ENV_VAR]["logs_folder"], task), "rb") as file:
         logs = file.read()
     if len(logs) > 0:
-        _id = add_item_fs(defaultdb["dbname"], defaultdb["taskfileslogscoll"], logs, "log", None, task, "text/plain", datetime.now())
-        if _id:
+        if _id := add_item_fs(
+            defaultdb["dbname"],
+            defaultdb["taskfileslogscoll"],
+            logs,
+            "log",
+            None,
+            task,
+            "text/plain",
+            datetime.now(),
+        ):
             log_string("Logs result dumped into db", "Yellow")
         else:
             log_string("Unable to dump logs result to db", "Red")
@@ -182,7 +196,7 @@ def verbose(on_off=False, verbose_output=False, timeout=None, _str=None):
         def wrapper(*args, **kwargs):
             result = None
             #global pool
-            function_name = func.__module__ + "." + func.__name__
+            function_name = f"{func.__module__}.{func.__name__}"
             try:
                 if not on_off:
                     log_string(function_name, "Yellow")
@@ -210,7 +224,9 @@ def verbose(on_off=False, verbose_output=False, timeout=None, _str=None):
             except Exception as error:
                 log_string("{}.{} Failed -> {}".format(func.__module__, func.__name__, error), "Red")
             return result
+
         return wrapper
+
     return decorator
 
 

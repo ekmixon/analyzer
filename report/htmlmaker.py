@@ -26,7 +26,7 @@ class HtmlMaker:
             self.templates = self.templates + path.sep
         if not path.isdir(self.templates):
             mkdir(self.templates)
-        self.template = self.templates + "template.html"
+        self.template = f"{self.templates}template.html"
         self.qbimage = qbimage()
         self.qbicons = qbicons()
         self.get_moudles()
@@ -37,7 +37,7 @@ class HtmlMaker:
         make bottom
         '''
         temp_list = [x.split(".")[0] for x in modules if not x.startswith("_")]
-        self.bottom = '(QBAnalyzer∞ proudly uses/depends on Docker, Python3, Bootstrap, Javascript, jquery, D3.js, JSON, Html, Sqlite3, Wikipedia, Linux\\MacOS\\Windows\\Android documentation, software77, MITRE ATT&CK™, sc0ty, hexacorn, radare2, dmg2img, snort, snort rules community, font-awesome, flag-icon-css, yara-rules github community {} and tons of researches ..) If i missed a reference/dependency, please let me know!'.format(', '.join(list(set(temp_list))))
+        self.bottom = f"(QBAnalyzer∞ proudly uses/depends on Docker, Python3, Bootstrap, Javascript, jquery, D3.js, JSON, Html, Sqlite3, Wikipedia, Linux\\MacOS\\Windows\\Android documentation, software77, MITRE ATT&CK™, sc0ty, hexacorn, radare2, dmg2img, snort, snort rules community, font-awesome, flag-icon-css, yara-rules github community {', '.join(list(set(temp_list)))} and tons of researches ..) If i missed a reference/dependency, please let me know!"
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
     def make_header(self, namespace) -> str:
@@ -45,8 +45,7 @@ class HtmlMaker:
         make header
         '''
         temp = """<div class=textareawrapper> <h1>{{ namespace }}</h1> </div>"""
-        result = Template(temp).render(namespace=namespace)
-        return result
+        return Template(temp).render(namespace=namespace)
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
     def make_image_table_base64(self, data, header, exclude=None, textarea=None, _safe=None) -> str:
@@ -69,8 +68,7 @@ class HtmlMaker:
         </table>
         </div>"""
 
-        result = Template(temp).render(header=header, data=data)
-        return result
+        return Template(temp).render(header=header, data=data)
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
     def make_icons_table_base64(self, data, header, exclude=None, textarea=None, _safe=None) -> str:
@@ -93,8 +91,7 @@ class HtmlMaker:
         </table>
         </div>"""
 
-        result = Template(temp).render(header=header, data=data, size=len(data))
-        return result
+        return Template(temp).render(header=header, data=data, size=len(data))
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
     def make_list_set_table_new1(self, data, headers, exclude=None, textarea=None, _safe=None) -> str:
@@ -131,8 +128,7 @@ class HtmlMaker:
         </table>
         </div>"""
 
-        result = Template(temp).render(headers=headers, data=data, _safe=_safe)
-        return result
+        return Template(temp).render(headers=headers, data=data, _safe=_safe)
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
     def make_list_set_table_new2(self, data, headers, exclude=None, textarea=None, _safe=None) -> str:
@@ -168,8 +164,7 @@ class HtmlMaker:
         </table>
         </div>"""
 
-        result = Template(temp).render(headers=headers, data=data, _safe=_safe)
-        return result
+        return Template(temp).render(headers=headers, data=data, _safe=_safe)
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
     def make_list_set_table_new3(self, data, header, exclude=None, textarea=None, _safe=None) -> str:
@@ -196,8 +191,7 @@ class HtmlMaker:
         </table>
         </div>"""
 
-        result = Template(temp).render(header=header, data=data, _safe=_safe)
-        return result
+        return Template(temp).render(header=header, data=data, _safe=_safe)
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
     def make_list_set_table_new4(self, data, headers, exclude=None, textarea=None, _safe=None) -> str:
@@ -234,8 +228,7 @@ class HtmlMaker:
         </table>
         </div>"""
 
-        result = Template(temp).render(headers=headers, data=data, _safe=_safe)
-        return result
+        return Template(temp).render(headers=headers, data=data, _safe=_safe)
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
     def make_list_set_table_tags_1(self, data, headers, exclude=None, textarea=None, _safe=None) -> str:
@@ -272,8 +265,7 @@ class HtmlMaker:
         </table>
         </div>"""
 
-        result = Template(temp).render(headers=headers, data=data, _safe=_safe)
-        return result
+        return Template(temp).render(headers=headers, data=data, _safe=_safe)
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
     def make_list_set_table_tags_2(self, data, headers, exclude=None, textarea=None, _safe=None) -> str:
@@ -296,8 +288,7 @@ class HtmlMaker:
         </table>
         </div>"""
 
-        result = Template(temp).render(headers=headers, data=data, _safe=_safe)
-        return result
+        return Template(temp).render(headers=headers, data=data, _safe=_safe)
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
     def make_flags(self, data, header, exclude=None, textarea=None, _safe=None) -> str:
@@ -320,8 +311,7 @@ class HtmlMaker:
         </table>
         </div>"""
 
-        result = Template(temp).render(header=header, data=data)
-        return result
+        return Template(temp).render(header=header, data=data)
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
     def make_world_image(self, data, header, name, exclude=None, textarea=None, _safe=None) -> str:
@@ -374,8 +364,7 @@ class HtmlMaker:
         </table>
         </div>"""
 
-        result = Template(temp).render(header=header, data=str(data), name=name)
-        return result
+        return Template(temp).render(header=header, data=str(data), name=name)
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
     def make_ref_map_image(self, data, header, name, exclude=None, textarea=None, _safe=None) -> str:
@@ -520,8 +509,7 @@ class HtmlMaker:
         </table>
         </div>"""
 
-        result = Template(temp).render(header="Xrefs", data=str(data), name=name)
-        return result
+        return Template(temp).render(header="Xrefs", data=str(data), name=name)
 
     @verbose(True, verbose_output=False, timeout=None, _str="Making file tables")
     def make_table(self, data, _path, parsed) -> str:

@@ -63,7 +63,7 @@ def get_entropy(data) -> str:
         for count in counter.values():
             temp_var = float(count) / temp_len
             entropy += - temp_var * log2(temp_var)
-        return "{} (Minimum: 0.0, Maximum: 8.0)".format(entropy)
+        return f"{entropy} (Minimum: 0.0, Maximum: 8.0)"
     return "None"
 
 
@@ -92,7 +92,11 @@ def get_entropyold(data):
     '''
     entropy = 0
     probabilities = [float(data.count(char)) / len(data) for char in dict.fromkeys(list(data))]
-    entropy = entropy - sum([probability * log2(probability) / log2(2.0) for probability in probabilities])
+    entropy -= sum(
+        probability * log2(probability) / log2(2.0)
+        for probability in probabilities
+    )
+
     return entropy
 
 
@@ -207,7 +211,7 @@ def check_url(url) -> bool:
     '''
     with ignore_excpetion(Exception):
         if not url.startswith(("http://", "https://", "ftp://")):
-            url = "http://" + url
+            url = f"http://{url}"
         if get_tld(url, fail_silently=True):
             root = None
             with ignore_excpetion(Exception):

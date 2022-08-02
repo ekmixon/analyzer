@@ -21,7 +21,7 @@ class QBQueue():
         '''
         initialize class and enable get/put
         '''
-        self.key = '%s:%s' % (namespace, name)
+        self.key = f'{namespace}:{name}'
         self._redis = Redis.from_url(url)
         self.enable_get()
         self.enable_put()
@@ -49,17 +49,13 @@ class QBQueue():
         '''
         get queue status
         '''
-        if self._redis.get('_get') == b"True":
-            return True
-        return False
+        return self._redis.get('_get') == b"True"
 
     def put_status(self):
         '''
         change queue status
         '''
-        if self._redis.get('_put') == b"True":
-            return True
-        return False
+        return self._redis.get('_put') == b"True"
 
     def enable_get(self):
         '''

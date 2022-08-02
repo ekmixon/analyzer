@@ -28,12 +28,12 @@ class YaraParser:
         self.yarapath = path.abspath(path.join(path.dirname(__file__), 'rules'))
         if not self.yarapath.endswith(path.sep):
             self.yarapath = self.yarapath + path.sep
-        self.yararules = glob(self.yarapath + "*.yar")
+        self.yararules = glob(f"{self.yarapath}*.yar")
         self.yararulenamelist = {}
         self._set = {}
         for rule in self.yararules:
             head, tail = path.split(rule)
-            self._set.update({tail.split(".")[0]: rule})
+            self._set[tail.split(".")[0]] = rule
         self.rules = ycompile(filepaths=self._set)
         for rule in self.yararules:
             temp_x = [line.strip() for line in open(rule, 'r')]
@@ -47,11 +47,11 @@ class YaraParser:
         self.yara_path_tags = path.abspath(path.join(path.dirname(__file__), 'rules-master'))
         if not self.yara_path_tags.endswith(path.sep):
             self.yara_path_tags = self.yara_path_tags + path.sep
-        self.yara_rules_tags = glob(self.yara_path_tags + "*.yar")
+        self.yara_rules_tags = glob(f"{self.yara_path_tags}*.yar")
         self._set_tags = {}
         for rule in self.yara_rules_tags:
             head, tail = path.split(rule)
-            self._set_tags.update({tail.split(".")[0]: rule})
+            self._set_tags[tail.split(".")[0]] = rule
         self.rules_tags = ycompile(filepaths=self._set_tags)
 
     @verbose(True, verbose_output=False, timeout=None, _str="Checking with yara rules")
@@ -63,20 +63,28 @@ class YaraParser:
         if parsed.full or parsed.tags:
             log_string("Finding yara tags", "Green")
             matches = self.rules_tags.match(data["Location"]["File"])
-            list_of_matches = []
             if len(matches) > 0:
+                list_of_matches = []
                 for match in matches:
-                    full_rule = "{}:{}".format(match.namespace, match.rule)
+                    full_rule = f"{match.namespace}:{match.rule}"
                     if full_rule not in list_of_matches:
                         list_of_matches.append(full_rule)
                         color = None
                         with ignore_excpetion(Exception):
                             color = default_colors[match.namespace]
-                        data["Yara"]["Tags"].append({"fullrule": full_rule,
-                                                     "namespace": match.namespace,
-                                                     "color": color,
-                                                     "rule": match.rule,
-                                                     "meta": '\n'.join("{}: {}".format(key, match.meta[key]) for key in match.meta)})
+                        data["Yara"]["Tags"].append(
+                            {
+                                "fullrule": full_rule,
+                                "namespace": match.namespace,
+                                "color": color,
+                                "rule": match.rule,
+                                "meta": '\n'.join(
+                                    f"{key}: {match.meta[key]}"
+                                    for key in match.meta
+                                ),
+                            }
+                        )
+
 
         if parsed.full or parsed.yara:
             matches = self.rules.match(data["Location"]["File"])
@@ -85,7 +93,7 @@ class YaraParser:
                 for match in matches:
                     temp = {}
                     for _match in match.strings:
-                        key = "{}:{}".format(match.namespace, match)
+                        key = f"{match.namespace}:{match}"
                         ppattern = "None"
                         good_exe = False
                         with ignore_excpetion(Exception):
@@ -98,13 +106,23 @@ class YaraParser:
                         if pattern in temp:
                             temp[pattern][0] += 1
                             temp[pattern][1].append(hex(_match[0]))
-                        else:
-                            if match.rule in self.yararulenamelist:
-                                temp.update({pattern: [0, [hex(_match[0])], str(match), ppattern, self.yararulenamelist[match.rule]]})
-                    for item in temp:
-                        data["Yara"]["Matches"].append({"Count": temp[item][0],
-                                                        "Offset": " ".join(temp[item][1]),
-                                                        "Rule": temp[item][2],
-                                                        "Patteren": item,
-                                                        "Parsed": temp[item][3],
-                                                        "Condition": temp[item][4]})
+                        elif match.rule in self.yararulenamelist:
+                            temp[pattern] = [
+                                0,
+                                [hex(_match[0])],
+                                str(match),
+                                ppattern,
+                                self.yararulenamelist[match.rule],
+                            ]
+
+                    for item, value in temp.items():
+                        data["Yara"]["Matches"].append(
+                            {
+                                "Count": value[0],
+                                "Offset": " ".join(temp[item][1]),
+                                "Rule": temp[item][2],
+                                "Patteren": item,
+                                "Parsed": temp[item][3],
+                                "Condition": temp[item][4],
+                            }
+                        )

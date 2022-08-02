@@ -63,10 +63,15 @@ class PDFParser:
         '''
         get objects from pdf by regex
         '''
-        temp_list = []
         objects_list = findall(self.objectsdetection, pdf)
-        for _ in objects_list:
-            temp_list.append({"Object": _[0].decode("utf-8", errors="ignore"), "Value": _[1].decode('utf-8', errors="ignore")})
+        temp_list = [
+            {
+                "Object": _[0].decode("utf-8", errors="ignore"),
+                "Value": _[1].decode('utf-8', errors="ignore"),
+            }
+            for _ in objects_list
+        ]
+
         return len(objects_list), temp_list
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
@@ -94,10 +99,12 @@ class PDFParser:
         '''
         get JS from pdf by regex
         '''
-        temp_list = []
         jslist = findall(self.jsdetection, pdf)
-        for _ in jslist:
-            temp_list.append({"Key": "/JS", "Value": _.decode("utf-8", errors="ignore")})
+        temp_list = [
+            {"Key": "/JS", "Value": _.decode("utf-8", errors="ignore")}
+            for _ in jslist
+        ]
+
         return len(jslist), temp_list
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
@@ -105,10 +112,12 @@ class PDFParser:
         '''
         get JavaScript from pdf by regex
         '''
-        temp_list = []
         javascript_list = findall(self.javascriptdetection, pdf)
-        for _ in javascript_list:
-            temp_list.append({"Key": "/JavaScript", "Value": _.decode("utf-8", errors="ignore")})
+        temp_list = [
+            {"Key": "/JavaScript", "Value": _.decode("utf-8", errors="ignore")}
+            for _ in javascript_list
+        ]
+
         return len(javascript_list), temp_list
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
@@ -116,10 +125,12 @@ class PDFParser:
         '''
         get openactions from pdf by regex
         '''
-        temp_list = []
         open_action_list = findall(self.openactiondetection, pdf)
-        for _ in open_action_list:
-            temp_list.append({"Key": "/OpenAction", "Value": _.decode("utf-8", errors="ignore")})
+        temp_list = [
+            {"Key": "/OpenAction", "Value": _.decode("utf-8", errors="ignore")}
+            for _ in open_action_list
+        ]
+
         return len(open_action_list), temp_list
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
@@ -127,10 +138,12 @@ class PDFParser:
         '''
         get Launch from pdf by regex
         '''
-        temp_list = []
         launch_list = findall(self.launchdetection, pdf)
-        for _ in launch_list:
-            temp_list.append({"Key": "/Launch", "Value": _.decode("utf-8", errors="ignore")})
+        temp_list = [
+            {"Key": "/Launch", "Value": _.decode("utf-8", errors="ignore")}
+            for _ in launch_list
+        ]
+
         return len(launch_list), temp_list
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
@@ -138,10 +151,12 @@ class PDFParser:
         '''
         get URI from pdf by regex
         '''
-        temp_list = []
         uri_list = findall(self.uridetection, pdf)
-        for _ in uri_list:
-            temp_list.append({"Key": "/URI", "Value": _.decode("utf-8", errors="ignore")})
+        temp_list = [
+            {"Key": "/URI", "Value": _.decode("utf-8", errors="ignore")}
+            for _ in uri_list
+        ]
+
         return len(uri_list), temp_list
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
@@ -149,10 +164,12 @@ class PDFParser:
         '''
         get Action from pdf by regex
         '''
-        temp_list = []
         action_list = findall(self.actiondetection, pdf)
-        for _ in action_list:
-            temp_list.append({"Key": "/Action", "Value": _.decode("utf-8", errors="ignore")})
+        temp_list = [
+            {"Key": "/Action", "Value": _.decode("utf-8", errors="ignore")}
+            for _ in action_list
+        ]
+
         return len(action_list), temp_list
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
@@ -160,10 +177,12 @@ class PDFParser:
         '''
         get GoToR from pdf by regex
         '''
-        temp_list = []
         goto_list = findall(self.gotodetection, pdf)
-        for _ in goto_list:
-            temp_list.append({"Key": "/GoToR", "Value": _.decode("utf-8", errors="ignore")})
+        temp_list = [
+            {"Key": "/GoToR", "Value": _.decode("utf-8", errors="ignore")}
+            for _ in goto_list
+        ]
+
         return len(goto_list), temp_list
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
@@ -171,10 +190,12 @@ class PDFParser:
         '''
         get RichMedia from pdf by regex
         '''
-        temp_list = []
         richmedia_list = findall(self.richmediadetection, pdf)
-        for _ in richmedia_list:
-            temp_list.append({"Key": "/RichMedia", "Value": _.decode("utf-8", errors="ignore")})
+        temp_list = [
+            {"Key": "/RichMedia", "Value": _.decode("utf-8", errors="ignore")}
+            for _ in richmedia_list
+        ]
+
         return len(richmedia_list), temp_list
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
@@ -182,10 +203,12 @@ class PDFParser:
         '''
         get AA from pdf by regex
         '''
-        temp_list = []
         aa_list = findall(self.aadetection, pdf)
-        for _ in aa_list:
-            temp_list.append({"Key": "/AA", "Value": _.decode("utf-8", errors="ignore")})
+        temp_list = [
+            {"Key": "/AA", "Value": _.decode("utf-8", errors="ignore")}
+            for _ in aa_list
+        ]
+
         return len(aa_list), temp_list
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
@@ -193,7 +216,7 @@ class PDFParser:
         '''
         check if mime is pdf
         '''
-        return bool(data["Details"]["Properties"]["mime"] == "application/pdf")
+        return data["Details"]["Properties"]["mime"] == "application/pdf"
 
     @verbose(True, verbose_output=False, timeout=None, _str="Analyzing PDF file")
     def analyze(self, data):

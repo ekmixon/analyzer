@@ -43,9 +43,17 @@ class QBBehavior:
                         tempmatches = 0
                         for item in _["Detection"]:
                             if _["Options"]["Word"] == "Normal":
-                                temp_value = rsearch(rcompile(r"{}".format(item), _["Options"]["Flag"]), self.wordsstripped)
-                            elif _["Options"]["Word"] != "Normal":
-                                temp_value = rsearch(rcompile(r"\b{}\b".format(item), _["Options"]["Flag"]), self.wordsstripped)
+                                temp_value = rsearch(
+                                    rcompile(f"{item}", _["Options"]["Flag"]),
+                                    self.wordsstripped,
+                                )
+
+                            else:
+                                temp_value = rsearch(
+                                    rcompile(f"\b{item}\b", _["Options"]["Flag"]),
+                                    self.wordsstripped,
+                                )
+
                             if temp_value is not None:
                                 _list.append(temp_value.group())
                                 tempmatches += 1
@@ -63,5 +71,5 @@ class QBBehavior:
         self.words = data["StringsRAW"]["wordsinsensitive"]
         self.wordsstripped = data["StringsRAW"]["wordsstripped"]
         self.rcompile_and_find(temp, self.intell + filename)
-        if len(temp) > 0:
+        if temp:
             data["Behavior"]["Intell"].extend(temp)

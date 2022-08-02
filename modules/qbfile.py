@@ -58,7 +58,7 @@ class QBFile:
         create temp folder that has the md5 of the target file
         '''
         safename = "".join([c for c in path.basename(_path) if match(r'[\w\.]', c)])
-        if len(safename) == 0:
+        if not safename:
             safename = "temp"
         temp_md5 = data["Details"]["Properties"]["md5"]
         folder_path = self.malwarefarm + uuid + "_" + temp_md5
@@ -99,9 +99,11 @@ class QBFile:
         if file is archive, then unpack and get words, wordsstripped otherwise
         get words, wordsstripped from the file only
         '''
-        if data["Details"]["Properties"]["mime"] == "application/java-archive" or \
-                data["Details"]["Properties"]["mime"] == "application/zip" or \
-                data["Details"]["Properties"]["mime"] == "application/zlib":
+        if data["Details"]["Properties"]["mime"] in [
+            "application/java-archive",
+            "application/zip",
+            "application/zlib",
+        ]:
             unpack_file(data, data["Location"]["File"])
             get_words_multi_files(data, data["Packed"]["Files"])
         else:
