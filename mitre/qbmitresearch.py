@@ -23,7 +23,7 @@ class QBMitresearch():
             self.mitrepath = self.mitrepath + path.sep
         if not path.isdir(self.mitrepath):
             mkdir(self.mitrepath)
-        self.parsediocs = self.mitrepath + "parsediocs.json"
+        self.parsediocs = f"{self.mitrepath}parsediocs.json"
         self.words = []
         self.wordsstripped = ""
 
@@ -32,11 +32,17 @@ class QBMitresearch():
         '''
         get attack info from fulldict
         '''
-        for temp_x in temp_s:
-            if "id" in temp_x and "attack-pattern" in temp_x["id"]:
-                if temp_x['external_references'][0]['external_id'].lower() == attack:
-                    return temp_x
-        return None
+        return next(
+            (
+                temp_x
+                for temp_x in temp_s
+                if "id" in temp_x
+                and "attack-pattern" in temp_x["id"]
+                and temp_x['external_references'][0]['external_id'].lower()
+                == attack
+            ),
+            None,
+        )
 
     @verbose(True, verbose_output=False, timeout=None, _str="Finding attack patterns")
     def check_mitre_similarity(self, data):
@@ -70,14 +76,12 @@ class QBMitresearch():
         check if words are tools or malware listed in mitre
         '''
         for _word in self.words:
-            toolrecords = self.mitre.findtool(_word)
-            if toolrecords:
+            if toolrecords := self.mitre.findtool(_word):
                 for record in toolrecords:
                     data["Binary"].append({"Word": _word,
                                            "Name": record["name"],
                                            "Description": record["description"]})
-            malwarerecords = self.mitre.findmalware(_word)
-            if malwarerecords:
+            if malwarerecords := self.mitre.findmalware(_word):
                 for record in malwarerecords:
                     data["Binary"].append({"Word": _word,
                                            "Name": record["name"],

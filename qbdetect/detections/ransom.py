@@ -21,22 +21,28 @@ def startanalyzing(data):
     for detectonroot in DETECTIONS:
         detect = 0
         temp_list = []
-        for check in range(0, 15):
+        for _ in range(15):
             randompick = choice(DETECTIONS[detectonroot])
             nextpick = DETECTIONS[detectonroot][(DETECTIONS[detectonroot].index(randompick) + 1) % len(DETECTIONS[detectonroot])]
-            if search(rcompile(r"{}[ \x00\|]{}".format(randompick, nextpick), I), data["StringsRAW"]["wordsstripped"]):
-                temp_list.append("({} {})".format(randompick, nextpick))
+            if search(
+                rcompile(f"{randompick}[ \x00\|]{nextpick}", I),
+                data["StringsRAW"]["wordsstripped"],
+            ):
+                temp_list.append(f"({randompick} {nextpick})")
                 detect += 1
         if detect >= 5:
             data["QBDETECT"]["Detection"].append({"Count": detect, "Offset": "Unavailable", "Rule": "Ransom", "Match": ", ".join(temp_list), "Parsed": None})
         else:
             detect = 0
             temp_list = []
-            for check in range(0, 15):
+            for _ in range(15):
                 randompick1 = choice(DETECTIONS[detectonroot])
                 randompick2 = choice(DETECTIONS[detectonroot])
-                if search(rcompile(r"{}[ \x00\|]{}".format(randompick1, randompick2), I), data["StringsRAW"]["wordsstripped"]):
-                    temp_list.append("({} {})".format(randompick1, randompick2))
+                if search(
+                    rcompile(f"{randompick1}[ \x00\|]{randompick2}", I),
+                    data["StringsRAW"]["wordsstripped"],
+                ):
+                    temp_list.append(f"({randompick1} {randompick2})")
                     detect += 1
             if detect >= 5:
                 data["QBDETECT"]["Detection"].append({"Count": detect, "Offset": "Unavailable", "Rule": "Ransom", "Match": ", ".join(temp_list), "Parsed": None})

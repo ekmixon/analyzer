@@ -89,8 +89,7 @@ class QBEncryption:
         temp_list = []
         temp_var = findall(self.detectioncheckmd5, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             data.append({"Count": temp_list.count(temp_var), "MD5": temp_var})
 
@@ -102,8 +101,7 @@ class QBEncryption:
         temp_list = []
         temp_var = findall(self.detectionchecksha1, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             data.append({"Count": temp_list.count(temp_var), "SHA1": temp_var})
 
@@ -115,8 +113,7 @@ class QBEncryption:
         temp_list = []
         temp_var = findall(self.detectionchecksha256, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             data.append({"Count": temp_list.count(temp_var), "SHA256": temp_var})
 
@@ -128,8 +125,7 @@ class QBEncryption:
         temp_list = []
         temp_var = findall(self.detectionchecksha512, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             data.append({"Count": temp_list.count(temp_var), "SHA512": temp_var})
 
@@ -148,8 +144,7 @@ class QBEncryption:
             temp_list = []
             temp_var = findall(detection[1], self.wordsstripped)
             if len(temp_var) > 0:
-                for _ in temp_var:
-                    temp_list.append(_)
+                temp_list.extend(iter(temp_var))
             for temp_var in set(temp_list):
                 data.append({"Count": temp_list.count(temp_var), "Description": detection[0], "UUID": temp_var})
 
@@ -161,8 +156,7 @@ class QBEncryption:
         temp_list = []
         temp_var = findall(self.detectioncheckcrc, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             data.append({"Count": temp_list.count(temp_var), "CRC": temp_var})
 
@@ -174,8 +168,7 @@ class QBEncryption:
         temp_list = []
         temp_var = findall(self.detectioncheckjwt, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             data.append({"Count": temp_list.count(temp_var), "JWT": temp_var})
 
@@ -195,8 +188,7 @@ class QBEncryption:
         for logic in detections:
             temp_var = findall(detections[logic], self.buffer)
             if len(temp_var) > 0:
-                for _ in temp_var:
-                    temp_list.append(_)
+                temp_list.extend(iter(temp_var))
             for temp_var in set(temp_list):
                 data.append({"Count": temp_list.count(temp_var), "Logic": logic})
 

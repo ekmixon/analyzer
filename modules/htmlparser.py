@@ -80,10 +80,7 @@ class HTMLParser():
         '''
         scripts = soup.findAll("script")
         for script in scripts:
-            if script.text != "":
-                entropy = get_entropy(script.text)
-            else:
-                entropy = None
+            entropy = get_entropy(script.text) if script.text != "" else None
             data.append({"line": script.sourceline,
                          "Entropy": entropy,
                          "type": script.get("type"),
@@ -97,11 +94,15 @@ class HTMLParser():
         '''
         iframes = soup.findAll("iframe")
         for iframe in iframes:
-            data.append({"line": iframe.sourceline,
-                         "frameborder": iframe.get("frameborder"),
-                         "widthxheight": "{}x{}".format(iframe.get("width"), iframe.get("height")),
-                         "scr": iframe.get("src"),
-                         "text": iframe.text})
+            data.append(
+                {
+                    "line": iframe.sourceline,
+                    "frameborder": iframe.get("frameborder"),
+                    "widthxheight": f'{iframe.get("width")}x{iframe.get("height")}',
+                    "scr": iframe.get("src"),
+                    "text": iframe.text,
+                }
+            )
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
     def get_links(self, data, soup):
@@ -167,9 +168,12 @@ class HTMLParser():
         '''
         check if file is html/htm
         '''
-        if data["FilesDumps"][data["Location"]["File"]].lower()[:4] == b"<htm" or data["FilesDumps"][data["Location"]["File"]].lower().startswith(b"<!doctype htm"):
-            return True
-        return False
+        return bool(
+            data["FilesDumps"][data["Location"]["File"]].lower()[:4] == b"<htm"
+            or data["FilesDumps"][data["Location"]["File"]]
+            .lower()
+            .startswith(b"<!doctype htm")
+        )
         # if bool(BeautifulSoup(data["FilesDumps"][data["Location"]["File"]].lower(), "html.parser").find()):
         #    return True
 

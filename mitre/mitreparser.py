@@ -42,15 +42,19 @@ class MitreParser():
         if not, download them and parse them. otehrwise use the once from the system
         '''
         temp_list = {}
-        if not path.exists(_path + 'enterprise-attack.json') and not path.exists(_path + 'pre-attack.json'):
-            urlretrieve(self.enterpriseattackurl, _path + "enterprise-attack.json")
-            urlretrieve(self.preattackurl, _path + "pre-attack.json")
-        with copen(_path + "enterprise-attack.json", encoding='ascii', errors='ignore') as enterprise, copen(_path + "pre-attack.json", encoding='ascii', errors='ignore') as pre:
+        if not path.exists(f'{_path}enterprise-attack.json') and not path.exists(
+            f'{_path}pre-attack.json'
+        ):
+            urlretrieve(self.enterpriseattackurl, f"{_path}enterprise-attack.json")
+            urlretrieve(self.preattackurl, f"{_path}pre-attack.json")
+        with copen(f"{_path}enterprise-attack.json", encoding='ascii', errors='ignore') as enterprise, copen(f"{_path}pre-attack.json", encoding='ascii', errors='ignore') as pre:
             self.preattack = pre.read()
             self.enterprise = enterprise.read()
-            if path.exists(_path + 'hardcoded_usedict.json') and path.exists(_path + 'hardcoded_fulldict.json'):
-                self.fulldict = load(copen(_path + "hardcoded_fulldict.json"))
-                self.usedict = load(copen(_path + "hardcoded_usedict.json"))
+            if path.exists(f'{_path}hardcoded_usedict.json') and path.exists(
+                f'{_path}hardcoded_fulldict.json'
+            ):
+                self.fulldict = load(copen(f"{_path}hardcoded_fulldict.json"))
+                self.usedict = load(copen(f"{_path}hardcoded_usedict.json"))
             else:
                 temp_list['preattack'] = loads(self.preattack)['objects']
                 temp_list['enterprise'] = loads(self.enterprise)['objects']
@@ -58,8 +62,8 @@ class MitreParser():
                 self.update_dict(temp_list['enterprise'], {"collection": "enterprise"})
                 self.fulldict = temp_list['preattack'] + temp_list['enterprise']
                 self.usedict = self.finduses()
-                dump(self.fulldict, copen(_path + "hardcoded_fulldict.json", 'w'))
-                dump(self.usedict, copen(_path + "hardcoded_usedict.json", 'w'))
+                dump(self.fulldict, copen(f"{_path}hardcoded_fulldict.json", 'w'))
+                dump(self.usedict, copen(f"{_path}hardcoded_usedict.json", 'w'))
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
     def update_dict(self, temp_d, temp_s):
@@ -85,11 +89,14 @@ class MitreParser():
         '''
         fine item and return
         '''
-        temp_l = []
-        for temp_x in temp_s:
-            if all((temp_k in temp_x and temp_x[temp_k] == temp_var) for temp_k, temp_var in temp_d.items()):
-                temp_l.append({key: temp_x.get(key) for key in temp_r})
-        return temp_l
+        return [
+            {key: temp_x.get(key) for key in temp_r}
+            for temp_x in temp_s
+            if all(
+                (temp_k in temp_x and temp_x[temp_k] == temp_var)
+                for temp_k, temp_var in temp_d.items()
+            )
+        ]
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
     def nested_search(self, temp_k, temp_d):
@@ -100,8 +107,7 @@ class MitreParser():
             return temp_d[temp_k]
         for temp_k, temp_var in temp_d.items():
             if isinstance(temp_var, dict):
-                result = self.nested_search(temp_k, temp_var)
-                if result:
+                if result := self.nested_search(temp_k, temp_var):
                     return temp_k, result
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
@@ -111,14 +117,15 @@ class MitreParser():
         '''
         temp_l = {}
         for temp_x in temp_s[0]:
-            if temp_x['type'] == 'attack-pattern':
-                if temp_x['id'] not in temp_l:
-                    temp_l.update({temp_x['id']: temp_x['name']})
+            if temp_x['type'] == 'attack-pattern' and temp_x['id'] not in temp_l:
+                temp_l[temp_x['id']] = temp_x['name']
             if isinstance(temp_x['description'], list):
                 for temp_d in temp_x['description']:
-                    if temp_d['type'] == 'attack-pattern':
-                        if temp_d['id'] not in temp_l:
-                            temp_l.update({temp_d['id']: temp_d['name']})
+                    if (
+                        temp_d['type'] == 'attack-pattern'
+                        and temp_d['id'] not in temp_l
+                    ):
+                        temp_l[temp_d['id']] = temp_d['name']
         if _print:
             print(dumps(temp_l, indent=4, sort_keys=True))
         return temp_l
@@ -150,10 +157,21 @@ class MitreParser():
                     else:
                         temp_d[temp_s['type']].update({temp_s['name']: [{'id': temp_xx, 'name': temp_u['name'], 'type':temp_u['type'], 'description':temp_i['description'], 'collection':temp_i['collection']}]})
                 else:
-                    temp_d.update({temp_s['type'].lower().rstrip(): {temp_s['name']: [{'id': temp_xx, 'name': temp_u['name'], 'type':temp_u['type'], 'description':temp_i['description'], 'collection':temp_i['collection']}]}})
+                    temp_d[temp_s['type'].lower().rstrip()] = {
+                        temp_s['name']: [
+                            {
+                                'id': temp_xx,
+                                'name': temp_u['name'],
+                                'type': temp_u['type'],
+                                'description': temp_i['description'],
+                                'collection': temp_i['collection'],
+                            }
+                        ]
+                    }
+
         for temp_i in temp_d['intrusion-set']:
             for temp_ii in temp_d['intrusion-set'][temp_i]:
-                if temp_ii['type'] == 'malware' or temp_ii['type'] == 'tool':
+                if temp_ii['type'] in ['malware', 'tool']:
                     temp_ii['description'] = []
                     for temp_x in temp_d[temp_ii['type']][temp_ii['name']]:
                         temp_xx = self.search_once(self.fulldict, {'name': temp_x['name']})
@@ -214,9 +232,8 @@ class MitreParser():
         '''
         search for specific word in the files (case insensitive)
         '''
-        temp_x = {}
-        pattern = rcompile(r'(^.*%s.*$)' % word, 8 | 2)
-        temp_x['enterpriseattack'] = list(set(findall(pattern, self.enterprise)))
+        pattern = rcompile(f'(^.*{word}.*$)', 8 | 2)
+        temp_x = {'enterpriseattack': list(set(findall(pattern, self.enterprise)))}
         temp_x['preattack'] = list(set(findall(pattern, self.preattack)))
         if _print:
             print(dumps(temp_x, indent=4, sort_keys=True))

@@ -36,9 +36,9 @@ class Officex:
                            "_DDE": ""}
 
         self.word_namespace = '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}'
-        self.para = self.word_namespace + 'p'
-        self.text = self.word_namespace + 't'
-        self.instrtext = self.word_namespace + 'instrText'
+        self.para = f'{self.word_namespace}p'
+        self.text = f'{self.word_namespace}t'
+        self.instrtext = f'{self.word_namespace}instrText'
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
     def office_analysis(self, data) -> dict:
@@ -47,7 +47,7 @@ class Officex:
         '''
         temp_dict = {"Hyber": [], "Other": []}
         _temp = {"Hyber": [], "Other": []}
-        for index, temp_var in enumerate(data["Packed"]["Files"]):
+        for temp_var in data["Packed"]["Files"]:
             if temp_var["Name"].lower().endswith(".xml"):
                 with ignore_excpetion(Exception):
                     temp_x = parseString(open(temp_var["Path"]).read()).toprettyxml(indent='  ')
@@ -67,7 +67,7 @@ class Officex:
         '''
         for index, temp_var in enumerate(data["Packed"]["Files"]):
             if temp_var["Name"].lower().endswith(".bin"):
-                temp_k = 'Office_bin_{}'.format(index)
+                temp_k = f'Office_bin_{index}'
                 data[temp_k] = {"Bin_Printable": "",
                                 "_Bin_Printable": ""}
                 temp_x = open(temp_var["Path"], "r", encoding="utf-8", errors='ignore').read()
@@ -81,13 +81,13 @@ class Officex:
         temp_dict = {}
         corepropns = '{http://schemas.openxmlformats.org/package/2006/metadata/core-properties}'
         meta = ["filename", "title", "subject", "creator", "keywords", "description", "lastModifiedBy", "revision", "modified", "created"]
-        for index, temp_var in enumerate(data["Packed"]["Files"]):
+        for temp_var in data["Packed"]["Files"]:
             if temp_var["Name"].lower() == "core.xml":
                 tree = cetXML(open(temp_var["Path"], "rb").read())
                 for item in meta:
-                    temp_x = tree.find("{}{}".format(corepropns, item))
+                    temp_x = tree.find(f"{corepropns}{item}")
                     if temp_x is not None:
-                        temp_dict.update({item: temp_x.text})
+                        temp_dict[item] = temp_x.text
                 break
         return temp_dict
 
@@ -97,12 +97,15 @@ class Officex:
         Extract text
         '''
         text = []
-        for index, temp_var in enumerate(data["Packed"]["Files"]):
+        for temp_var in data["Packed"]["Files"]:
             if temp_var["Name"].lower() == "document.xml":
                 tree = cetXML(open(temp_var["Path"], "rb").read())
                 print(tree)
-                for par in tree.iter(self.para):
-                    text.append(''.join(node.text for node in par.iter(self.text)))
+                text.extend(
+                    ''.join(node.text for node in par.iter(self.text))
+                    for par in tree.iter(self.para)
+                )
+
         return '\n'.join(text)
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
@@ -111,12 +114,12 @@ class Officex:
         Extract dde
         '''
         text = []
-        for index, temp_var in enumerate(data["Packed"]["Files"]):
+        for temp_var in data["Packed"]["Files"]:
             if temp_var["Name"].lower() == "document.xml":
                 tree = cetXML(open(temp_var["Path"], "rb").read())
                 for par in tree.iter(self.para):
                     string = ''.join(node.text for node in par.iter(self.instrtext))
-                    if len(string) > 0:
+                    if string != "":
                         text.append(string)
         return '\n'.join(text)
 
@@ -127,8 +130,13 @@ class Officex:
         '''
         temp_list = []
         with ignore_excpetion(Exception):
-            for (temp_f, temp_s, vbaname, vbacode) in VBA_Parser(path).extract_macros():
-                temp_list.append({"Name": vbaname, "VBA": vbacode})
+            temp_list.extend(
+                {"Name": vbaname, "VBA": vbacode}
+                for temp_f, temp_s, vbaname, vbacode in VBA_Parser(
+                    path
+                ).extract_macros()
+            )
+
         return temp_list
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)

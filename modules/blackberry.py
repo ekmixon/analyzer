@@ -84,8 +84,19 @@ class BBParser:
             if b"() " in _:
                 __ = _.split(b"() ")
                 with ignore_excpetion(Exception):
-                    _list.append({"Type": "Function", "Name": __[0].decode("utf-8", errors="ignore")})
-                    _list.append({"Type": "String", "Name": __[1].decode("utf-8", errors="ignore")})
+                    _list.extend(
+                        (
+                            {
+                                "Type": "Function",
+                                "Name": __[0].decode("utf-8", errors="ignore"),
+                            },
+                            {
+                                "Type": "String",
+                                "Name": __[1].decode("utf-8", errors="ignore"),
+                            },
+                        )
+                    )
+
         strings = findall(b"[\x24][\xd8] ([\x20-\x7e]{4,})", temp_f)  # <--- check this out
         for _ in strings:
             with ignore_excpetion(Exception):
@@ -97,10 +108,10 @@ class BBParser:
         '''
         check mime is cod or not
         '''
-        if data["Details"]["Properties"]["mime"] == "application/octet-stream" and \
-           data["Location"]["Original"].endswith(".cod"):
-            return True
-        return False
+        return bool(
+            data["Details"]["Properties"]["mime"] == "application/octet-stream"
+            and data["Location"]["Original"].endswith(".cod")
+        )
 
     @verbose(True, verbose_output=False, timeout=None, _str="Analzying COD file")
     def analyze(self, data):

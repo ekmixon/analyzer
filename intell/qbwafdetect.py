@@ -45,7 +45,14 @@ class QBWafDetect:
             if found != "":
                 temp_var = search(self.ipv4privateonelinebad, _["fields"][found])
                 if temp_var is not None:
-                    _data.append({"Matched": "1", "Required": 1, "WAF": "{} contains private IP".format(found), "Detected": temp_var.group()})
+                    _data.append(
+                        {
+                            "Matched": "1",
+                            "Required": 1,
+                            "WAF": f"{found} contains private IP",
+                            "Detected": temp_var.group(),
+                        }
+                    )
 
     @verbose(True, verbose_output=False, timeout=None, _str="Checking packets for WAF detection")
     def analyze(self, data, _data, filename):
@@ -67,9 +74,23 @@ class QBWafDetect:
                 with ignore_excpetion(Exception):
                     if "Type" in _ and "WQREGEX" in _["Type"]:
                         if _["Options"]["Word"] == "Normal" and "Header_Detection" in _:
-                            temp_var = search(rcompile(r"{}".format(_["Header_Detection"]), _["Options"]["Flag"]), headers)
+                            temp_var = search(
+                                rcompile(
+                                    f'{_["Header_Detection"]}',
+                                    _["Options"]["Flag"],
+                                ),
+                                headers,
+                            )
+
                         elif _["Options"]["Word"] == "Normal" and "Content_Detection" in _:
-                            temp_var = search(rcompile(r"{}".format(_["Content_Detection"]), _["Options"]["Flag"]), content)
+                            temp_var = search(
+                                rcompile(
+                                    f'{_["Content_Detection"]}',
+                                    _["Options"]["Flag"],
+                                ),
+                                content,
+                            )
+
                         if temp_var is not None:
                             _data.append({"Matched": "1", "Required": _["Options"]["Required"], "WAF": _["Name"], "Detected": temp_var.group()})
 

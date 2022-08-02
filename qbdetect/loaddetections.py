@@ -28,11 +28,15 @@ class LoadDetections:
             self.detections = self.detections + path.sep
         if not path.isdir(self.detections):
             mkdir(self.detections)
-        self.modules = glob(self.detections + "*.py")
+        self.modules = glob(f"{self.detections}*.py")
         self.imported = []
         for _module in self.modules:
             with ignore_excpetion(Exception):
-                mod = import_module(".qbdetect.detections.{}".format(path.basename(_module)[:-3]), package="analyzer")
+                mod = import_module(
+                    f".qbdetect.detections.{path.basename(_module)[:-3]}",
+                    package="analyzer",
+                )
+
                 self.imported.append(getattr(mod, "startanalyzing"))
                 log_string("Loading plugins completed", "Green")
 

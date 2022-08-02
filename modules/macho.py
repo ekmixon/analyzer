@@ -58,10 +58,17 @@ class Macho:
         '''
         temp_list = []
         for header in machos.headers:
-            for temp_lc, cmd, data in header.commands:
-                if temp_lc.cmd == LC_LOAD_DYLIB:
-                    temp_list.append({"Library": data.decode("utf-8", errors="ignore").rstrip('\x00'),
-                                      "Description": ""})
+            temp_list.extend(
+                {
+                    "Library": data.decode("utf-8", errors="ignore").rstrip(
+                        '\x00'
+                    ),
+                    "Description": "",
+                }
+                for temp_lc, cmd, data in header.commands
+                if temp_lc.cmd == LC_LOAD_DYLIB
+            )
+
         return temp_list
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
@@ -95,7 +102,7 @@ class Macho:
                         sus = "No"
                         entropy = get_entropy_float_ret(temp_x)
                         if entropy > 6 or (0 <= entropy <= 1):
-                            sus = "True, {}".format(entropy)
+                            sus = f"True, {entropy}"
                         elif cmd.filesize == 0:
                             sus = "True, section size 0"
                         seg = cmd.segname[:cmd.segname.find(b'\x00')].decode("utf-8", errors="ignore")
@@ -114,48 +121,44 @@ class Macho:
         '''
         get all symbols
         '''
-        temp_list = []
         temp_s = SymbolTable.SymbolTable(machos)
-        for (nlist, name) in temp_s.nlists:
-            temp_list.append({"Symbol": name.decode("utf-8", errors="ignore"),
-                              "Description": ""})
-        return temp_list
+        return [
+            {"Symbol": name.decode("utf-8", errors="ignore"), "Description": ""}
+            for nlist, name in temp_s.nlists
+        ]
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
     def get_local_symbols(self, machos) -> list:
         '''
         get local symbols
         '''
-        temp_list = []
         temp_s = SymbolTable.SymbolTable(machos)
-        for (nlist, name) in temp_s.localsyms:
-            temp_list.append({"Symbol": name.decode("utf-8", errors="ignore"),
-                              "Description": ""})
-        return temp_list
+        return [
+            {"Symbol": name.decode("utf-8", errors="ignore"), "Description": ""}
+            for nlist, name in temp_s.localsyms
+        ]
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
     def get_undef_symbols(self, machos) -> list:
         '''
         get undefined symbols
         '''
-        temp_list = []
         temp_s = SymbolTable.SymbolTable(machos)
-        for (nlist, name) in temp_s.undefsyms:
-            temp_list.append({"Symbol": name.decode("utf-8", errors="ignore"),
-                              "Description": ""})
-        return temp_list
+        return [
+            {"Symbol": name.decode("utf-8", errors="ignore"), "Description": ""}
+            for nlist, name in temp_s.undefsyms
+        ]
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
     def get_extdef_symbols(self, machos) -> list:
         '''
         get external reference symbol indices
         '''
-        temp_list = []
         temp_s = SymbolTable.SymbolTable(machos)
-        for (nlist, name) in temp_s.extdefsyms:
-            temp_list.append({"Symbol": name.decode("utf-8", errors="ignore"),
-                              "Description": ""})
-        return temp_list
+        return [
+            {"Symbol": name.decode("utf-8", errors="ignore"), "Description": ""}
+            for nlist, name in temp_s.extdefsyms
+        ]
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
     def get_plist(self, plist) -> dict:
@@ -170,9 +173,8 @@ class Macho:
         check mime is dmg or not
         '''
         if data["Details"]["Properties"]["mime"] == "application/zlib" and \
-                data["Location"]["Original"].endswith(".dmg"):
-            temp_x = dmg_unpack(data["Location"]["File"])
-            if temp_x:
+                    data["Location"]["Original"].endswith(".dmg"):
+            if temp_x := dmg_unpack(data["Location"]["File"]):
                 if check_packed_files(temp_x, ["info.plist"]) or check_packed_files(temp_x, ["Install"]):
                     unpack_file(data, temp_x)
                     return True
@@ -183,9 +185,7 @@ class Macho:
         '''
         check mime is machO or not
         '''
-        if data["Details"]["Properties"]["mime"] == "application/x-mach-binary":
-            return True
-        return False
+        return data["Details"]["Properties"]["mime"] == "application/x-mach-binary"
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)
     def check_sig_ipa(self, data) -> bool:
@@ -193,9 +193,8 @@ class Macho:
         check mime is dmg or not
         '''
         if data["Details"]["Properties"]["mime"] == "application/zlib" and \
-                data["Location"]["Original"].endswith(".ipa"):
-            temp_x = dmg_unpack(data["Location"]["File"])
-            if temp_x:
+                    data["Location"]["Original"].endswith(".ipa"):
+            if temp_x := dmg_unpack(data["Location"]["File"]):
                 if check_packed_files(temp_x, ["info.plist"]):
                     unpack_file(data, temp_x)
                     return True
@@ -208,13 +207,13 @@ class Macho:
         '''
         data["IPA"] = {"General": {},
                        "_General": {}}
-        for index, temp_var in enumerate(data["Packed"]["Files"]):
+        for temp_var in data["Packed"]["Files"]:
             if temp_var["Path"].lower().endswith("info.plist"):
                 data["DMG"]["General"] = self.get_plist(temp_var["Path"])
                 break
         for index, temp_var in enumerate(data["Packed"]["Files"]):
             if temp_var["Type"] == "text/x-shellscript":
-                temp_k = 'DMG_Shellscript_{}'.format(index)
+                temp_k = f'DMG_Shellscript_{index}'
                 data[temp_k] = {"Shell": "",
                                 "_Shell": ""}
                 data[temp_k]["Shell"] = open(temp_var["Path"], "r").read()
@@ -227,13 +226,13 @@ class Macho:
         '''
         data["DMG"] = {"General": {},
                        "_General": {}}
-        for index, temp_var in enumerate(data["Packed"]["Files"]):
+        for temp_var in data["Packed"]["Files"]:
             if temp_var["Path"].lower().endswith("info.plist"):
                 data["DMG"]["General"] = self.get_plist(temp_var["Path"])
                 break
         for index, temp_var in enumerate(data["Packed"]["Files"]):
             if temp_var["Type"] == "text/x-shellscript":
-                temp_k = 'DMG_Shellscript_{}'.format(index)
+                temp_k = f'DMG_Shellscript_{index}'
                 data[temp_k] = {"Shell": "",
                                 "_Shell": ""}
                 data[temp_k]["Shell"] = open(temp_var["Path"], "r").read()

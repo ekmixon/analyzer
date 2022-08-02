@@ -47,7 +47,7 @@ class OLEParser:
                 if chr(buffer[item]) == "}":
                     endcurlybracket += 1
                 if startcurlybracket == 0 and endcurlybracket == 1 or \
-                        endcurlybracket > startcurlybracket:
+                            endcurlybracket > startcurlybracket:
                     whitespaces = sub(rb'\s+', b'', buffer[position:item])
                     temp = unhexlify(whitespaces)
                     tempdecoded = sub(br'[^\x20-\x7F]+', b'', temp)
@@ -92,8 +92,13 @@ class OLEParser:
         '''
         temp_list = []
         with ignore_excpetion(Exception):
-            for (temp_f, temp_s, vbaname, vbacode) in VBA_Parser(path).extract_macros():
-                temp_list.append({"Name": vbaname, "VBA": vbacode})
+            temp_list.extend(
+                {"Name": vbaname, "VBA": vbacode}
+                for temp_f, temp_s, vbaname, vbacode in VBA_Parser(
+                    path
+                ).extract_macros()
+            )
+
         return temp_list
 
     @verbose(True, verbose_output=False, timeout=None, _str=None)

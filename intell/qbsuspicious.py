@@ -32,10 +32,12 @@ class QBSuspicious:
         '''
         for sus in self.suspicious:
             temp_list = []
-            temp_var = findall(recompile(r'(([^\n]+)?({})([^\n]+)?)'.format(sus), I), self.wordsstripped)
+            temp_var = findall(
+                recompile(f'(([^\n]+)?({sus})([^\n]+)?)', I), self.wordsstripped
+            )
+
             if len(temp_var) > 0:
-                for _ in temp_var:
-                    temp_list.append(_[0])
+                temp_list.extend(_[0] for _ in temp_var)
             for temp_var in set(temp_list):
                 data.append({"Count": temp_list.count(temp_var), "Detected": temp_var})
 
@@ -45,10 +47,7 @@ class QBSuspicious:
         I think this was faster than regex
         '''
         for sus in self.suspicious:
-            temp_list = []
-            for _ in self.words:
-                if sus in _:
-                    temp_list.append(_)
+            temp_list = [_ for _ in self.words if sus in _]
             for temp_var in set(temp_list):
                 data.append({"Count": temp_list.count(temp_var), "Detected": temp_var})
 

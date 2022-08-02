@@ -47,11 +47,7 @@ class QBEncdoing:
         open(_path, "rb").read()
         fbom = open(_path, "rb").read(4)
 
-        if _unicode:
-            encoding = "utf-16"
-        else:
-            encoding = "utf-8"
-
+        encoding = "utf-16" if _unicode else "utf-8"
         data["Encoding"]["Details"] = {"charset": Magic(mime_encoding=True).from_file(_path),
                                        "ForceEncoding": encoding,
                                        "ByteOrderMark": self.check_bom(fbom)}

@@ -41,7 +41,7 @@ class MSGParser():
         if msg.attachments != 0:
             for attachment in msg.attachments:
                 tempstring = "".join([choice(ascii_lowercase) for _ in range(5)])
-                safename = "temp_" + tempstring
+                safename = f"temp_{tempstring}"
                 file = path.join(data["Location"]["Folder"], safename)
                 tempfilename = "temp" + "".join([c for c in attachment.longFilename if match(r'[\w\.]', c)])
                 buffer = attachment.data
@@ -95,10 +95,10 @@ class MSGParser():
         '''
         check mime if it contains message or not
         '''
-        if "vnd.ms-outlook" in data["Details"]["Properties"]["mime"] or \
-                data["Location"]["Original"].endswith(".msg"):
-            return True
-        return False
+        return bool(
+            "vnd.ms-outlook" in data["Details"]["Properties"]["mime"]
+            or data["Location"]["Original"].endswith(".msg")
+        )
 
     @verbose(True, verbose_output=False, timeout=None, _str="Starting analyzing msg")
     def analyze(self, data, parsed):
@@ -115,10 +115,7 @@ class MSGParser():
         self.get_content(data["MSG"], message)
         if self.check_attachment_and_make_dir(data, message):
             streams = self.get_attachment(data, message)
-        else:
-            pass
-        mixed = streams + parts + headers
-        if len(mixed) > 0:
+        if mixed := streams + parts + headers:
             get_words_multi_filesarray(data, mixed)  # have to be bytes < will check this later on
         else:
             get_words(data, data["Location"]["File"])

@@ -20,7 +20,6 @@ def startanalyzing(data):
         temp_list = []
         temp_var = findall(DETECTIONS[detectonroot], data["StringsRAW"]["wordsstripped"])
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             data["QBDETECT"]["Detection"].append({"Count": temp_list.count(temp_var), "Offset": "Unavailable", "Rule": "API Alert", "Match": temp_var, "Parsed": None})

@@ -39,9 +39,8 @@ class QBPhishing:
         temp_list = []
         temp_var = findall(self.suspiciouswords, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
-        if len(temp_list) > 0:
+            temp_list.extend(iter(temp_var))
+        if temp_list:
             data.append({"Count": len(temp_list), "Words": ", ".join(temp_list)})
 
     @verbose(True, verbose_output=False, timeout=None, _str="Checking question marks and exclamation marks")

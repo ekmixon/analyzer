@@ -17,13 +17,10 @@ def check_packed_files(_path, files) -> bool:
     check if archive contains strings or not
     '''
     with ignore_excpetion(Exception):
-        detect = 0
         process = Popen(["7z", "l", _path], stdin=PIPE, stdout=PIPE, stderr=PIPE)
         output, error = process.communicate()
         output = output.decode("utf-8", errors="ignore")
-        for _ in files:
-            if _.lower() in output.lower():
-                detect += 1
+        detect = sum(_.lower() in output.lower() for _ in files)
         if detect == len(files):
             return True
 
@@ -35,11 +32,15 @@ def dmg_unpack(_path) -> str:
     '''
     convert dmg to img
     '''
-    process = Popen(["dmg2img", _path, _path + ".img"], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    process = Popen(
+        ["dmg2img", _path, f"{_path}.img"],
+        stdin=PIPE,
+        stdout=PIPE,
+        stderr=PIPE,
+    )
+
     output, error = process.communicate()
-    if b"dmg image is corrupted" not in output:
-        return _path + ".img"
-    return ""
+    return f"{_path}.img" if b"dmg image is corrupted" not in output else ""
 
 
 @verbose(True, verbose_output=False, timeout=None, _str=None)

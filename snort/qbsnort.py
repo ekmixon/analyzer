@@ -44,9 +44,22 @@ class QBSnort:
         ret = self.run_snort(filename)
         if len(ret) > 0:
             items = findall(self.snortpattern, ret)
-            for item in items:
-                temp_list.append({"time": item[0], "sid": item[2], "revision": item[3], "msg": item[4], "class": item[5], "priority": item[6], "protocol": item[7], "src": item[8], "dest": item[9]})
-        if len(temp_list) > 0:
+            temp_list.extend(
+                {
+                    "time": item[0],
+                    "sid": item[2],
+                    "revision": item[3],
+                    "msg": item[4],
+                    "class": item[5],
+                    "priority": item[6],
+                    "protocol": item[7],
+                    "src": item[8],
+                    "dest": item[9],
+                }
+                for item in items
+            )
+
+        if temp_list:
             data["Snort"] = deepcopy(sorted(temp_list, key=lambda i: datetime.strptime(i["time"], "%m/%d/%y-%H:%M:%S.%f")))
 
     @verbose(True, verbose_output=False, timeout=None, _str="Analyzing with snort")

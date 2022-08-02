@@ -94,7 +94,7 @@ class Analyzer:
 
         data = {}
 
-        log_string("Start analyzing {}".format(parsed.file), "Yellow")
+        log_string(f"Start analyzing {parsed.file}", "Yellow")
 
         self.qbfile.analyze(data, parsed.uuid, parsed.file, parsed.output)
         self.qbencoding.analyze(data, parsed.file, parsed.unicode)

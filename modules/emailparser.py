@@ -47,7 +47,7 @@ class EmailParser():
                 if attachment.get('Content-Disposition') is None:
                     continue
                 tempstring = "".join([choice(ascii_lowercase) for _ in range(5)])
-                safename = "temp_" + tempstring
+                safename = f"temp_{tempstring}"
                 file = path.join(data["Location"]["Folder"], safename)
                 tempfilename = "temp" + "".join([c for c in attachment.get_filename() if match(r'[\w\.]', c)])
                 buffer = attachment.get_payload(decode=True)
@@ -92,18 +92,16 @@ class EmailParser():
         if msg.is_multipart():
             for part in msg.get_payload():
                 tempstring = "".join([choice(ascii_lowercase) for _ in range(5)])
-                temppart = "Part {}".format(counter)
-                data[tempstring] = {temppart: "",
-                                    "_" + temppart: ""}
+                temppart = f"Part {counter}"
+                data[tempstring] = {temppart: "", f"_{temppart}": ""}
                 data[tempstring][temppart] = part.get_payload()
                 parts.append(bytes(part.get_payload(), 'utf8'))
                 counter += 1
         else:
             body = msg.get_payload()
             tempstring = "".join([choice(ascii_lowercase) for _ in range(5)])
-            temppart = "Part {}".format(counter)
-            data[tempstring] = {temppart: "",
-                                "_" + temppart: ""}
+            temppart = f"Part {counter}"
+            data[tempstring] = {temppart: "", f"_{temppart}": ""}
             data[tempstring][temppart] = body.get_payload()
             parts.append(bytes(body.get_payload(), 'utf8'))
             counter += 1
@@ -143,10 +141,10 @@ class EmailParser():
         '''
         check mime if it contains message or not
         '''
-        if "message" in data["Details"]["Properties"]["mime"] or \
-                data["Location"]["Original"].endswith(".eml"):
-            return True
-        return False
+        return bool(
+            "message" in data["Details"]["Properties"]["mime"]
+            or data["Location"]["Original"].endswith(".eml")
+        )
 
     @verbose(True, verbose_output=False, timeout=None, _str="Starting analyzing email")
     def analyze(self, data, parsed):
@@ -165,8 +163,7 @@ class EmailParser():
         parts = self.get_content_multi(data, message)
         if self.check_attachment_and_make_dir(data, message):
             streams = self.get_attachment(data, message)
-        mixed = streams + parts + headers
-        if len(mixed) > 0:
+        if mixed := streams + parts + headers:
             get_words_multi_filesarray(data, mixed)  # have to be bytes < will check this later on
         else:
             get_words(data, data["Location"]["File"])

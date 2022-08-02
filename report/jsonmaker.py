@@ -18,10 +18,8 @@ class ComplexEncoder(JSONEncoder):
         override default
         '''
         if not isinstance(obj, str):
-            return "Object type {} was removed..".format(type(obj))
-        if isinstance(obj, int):
-            return str(obj)
-        return JSONEncoder.default(self, obj)
+            return f"Object type {type(obj)} was removed.."
+        return str(obj) if isinstance(obj, int) else JSONEncoder.default(self, obj)
 
 
 class JSONMaker:

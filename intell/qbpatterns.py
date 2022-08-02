@@ -56,11 +56,8 @@ class QBPatterns:
         check if buffer contains ips xxx://xxxxxxxxxxxxx.xxx
         '''
         temp_list = []
-        temp_var = list(set(findall(self.links, self.wordsstripped)))
-        if len(temp_var) > 0:
-            for _ in temp_var:
-                if check_url(_[0]):
-                    temp_list.append(_[0])
+        if temp_var := list(set(findall(self.links, self.wordsstripped))):
+            temp_list.extend(_[0] for _ in temp_var if check_url(_[0]))
         for temp_var in set(temp_list):
             _data.append({"Count": temp_list.count(temp_var), "Link": temp_var})
 
@@ -104,8 +101,7 @@ class QBPatterns:
         temp_list = []
         temp_var = findall(self.ip6, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             _data.append({"Count": temp_list.count(temp_var), "IP": temp_var, "Code": "", "Alpha2": "", "Description": ""})
 
@@ -117,8 +113,7 @@ class QBPatterns:
         temp_list = []
         temp_var = findall(self.email, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_[0])
+            temp_list.extend(_[0] for _ in temp_var)
         for temp_var in set(temp_list):
             _data.append({"Count": temp_list.count(temp_var), "EMAIL": temp_var})
 
@@ -130,8 +125,7 @@ class QBPatterns:
         temp_list = []
         temp_var = findall(self.tel, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             _data.append({"Count": temp_list.count(temp_var), "TEL": temp_var})
 
@@ -143,8 +137,7 @@ class QBPatterns:
         temp_list = []
         temp_var = findall(self.html, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             _data.append({"Count": temp_list.count(temp_var), "TAG": temp_var})
 
@@ -156,8 +149,7 @@ class QBPatterns:
         temp_list = []
         temp_var = findall(self.hex, self.wordsstripped)
         if len(temp_var) > 0:
-            for _ in temp_var:
-                temp_list.append(_)
+            temp_list.extend(iter(temp_var))
         for temp_var in set(temp_list):
             with ignore_excpetion(Exception):
                 parsed = unhexlify(temp_var)
