@@ -1,4 +1,4 @@
-FROM mongo:3.4.8
+FROM mongo:3.6.22
 RUN echo "America/Los_Angeles" > /etc/timezone
 RUN dpkg-reconfigure -f noninteractive tzdata
 COPY ./databases databases
